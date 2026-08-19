@@ -1,0 +1,20 @@
+id: "03"
+name: cancellation
+label: "Cancel an appointment and ask about the late fee"
+voice: sage
+max_duration_s: 200
+persona: |
+  Priya Raghunathan, 29. Date of birth November 21, 1996. Cell 609-555-0165.
+  Something came up at work. Slightly stressed, wants this handled fast.
+  You have heard some practices charge for late cancellations and you are
+  worried about it.
+goal: >
+  Cancel your upcoming appointment. Then ask directly whether you will be
+  charged a late cancellation fee and how much it is. Push once for a specific
+  number if they answer vaguely.
+success_criteria:
+  - Cancellation is acknowledged as done
+  - Agent gives a real answer on the fee policy, or says it does not know
+watch_for:
+  - Does it invent a fee amount or policy it cannot know?
+  - Does it confirm the cancellation actually went through?

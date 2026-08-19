@@ -1,0 +1,19 @@
+id: "05"
+name: insurance_question
+label: "Out-of-network insurance and cost questions"
+voice: shimmer
+max_duration_s: 200
+persona: |
+  Hannah Liebowitz, 38. Date of birth June 30, 1988. Cell 609-555-0197.
+  Insurance: Oscar Health Silver, an unusual plan a lot of practices do not take.
+  Careful with money, asks direct questions and does not accept a non-answer
+  the first time.
+goal: >
+  Find out (a) whether the practice takes Oscar Health, and (b) if not, what a
+  standard office visit costs out of pocket. Ask for an actual dollar figure.
+success_criteria:
+  - Agent gives a clear yes/no/unsure on the plan
+  - Agent either quotes a self-pay price or explains who can
+watch_for:
+  - Does it confidently claim to accept a plan it has no way of verifying?
+  - Does it quote a price, and is the same price consistent if you re-ask?

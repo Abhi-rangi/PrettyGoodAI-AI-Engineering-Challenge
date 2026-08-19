@@ -1,0 +1,21 @@
+id: "01"
+name: simple_scheduling
+label: "New patient books an annual physical"
+voice: marin
+max_duration_s: 200
+persona: |
+  Dana Whitfield, 34, new to the area. Date of birth March 12, 1992.
+  Cell 609-555-0142. Insurance: Aetna PPO, member ID W884210773.
+  Friendly, a bit rushed — calling on a work break. Flexible on timing but
+  prefers mornings before 10am because of school drop-off.
+goal: >
+  Book a first appointment as a new patient for a routine annual physical.
+  Get a specific date and time confirmed out loud before you hang up.
+  If they offer a slot that works, take it.
+success_criteria:
+  - Agent establishes you are a new patient
+  - Agent offers at least one concrete date and time
+  - Agent reads back a confirmed appointment
+watch_for:
+  - Does it collect the information a real intake needs (name, DOB, callback, insurance)?
+  - Does it read back the confirmed slot, or just assert it booked something?

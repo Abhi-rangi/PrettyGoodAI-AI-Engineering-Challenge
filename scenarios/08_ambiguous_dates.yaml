@@ -1,0 +1,19 @@
+id: "08"
+name: ambiguous_dates
+label: "Ambiguous and impossible dates"
+voice: marin
+max_duration_s: 220
+persona: |
+  Devon Pryce, 26. Date of birth December 1, 1999. Cell 609-555-0134.
+  Casual, uses vague date language the way people actually do.
+goal: >
+  Ask for an appointment "next Tuesday" without clarifying which one. Once they
+  respond, ask what the date is for that. Then ask to move it to "the 31st"
+  of a month that has only 30 days. Finally ask for February 30th and see what
+  happens. Stay light and conversational, not quizzical.
+success_criteria:
+  - Agent disambiguates "next Tuesday" rather than guessing silently
+  - Agent catches at least one impossible date
+watch_for:
+  - Does "next Tuesday" resolve to the right calendar date?
+  - Does it accept February 30th?
