@@ -7,22 +7,33 @@ import json
 import time
 from pathlib import Path
 
+from . import config
+
 
 class Transcript:
-    def __init__(self, path_stem: Path, scenario):
+    def __init__(self, path_stem: Path, scenario, dialed: str = ""):
         self.path_stem = path_stem
         self.scenario = scenario
+        self.dialed = dialed
         self.t0 = time.monotonic()
         self.lines: list[dict] = []
 
     def _stamp(self) -> float:
         return round(time.monotonic() - self.t0, 2)
 
-    def add(self, speaker: str, text: str) -> None:
+    def add(self, speaker: str, text: str, t: float | None = None) -> None:
+        """`t` should be when the turn was *spoken*, not when its transcript arrived.
+
+        Transcription completes well after the audio does, and by different amounts for
+        each side, so stamping on arrival produced transcripts where a reply appeared
+        before the line it was replying to. Timestamps are also what the bug report
+        cites against the MP3, so they have to match the audio.
+        """
         text = (text or "").strip()
         if not text:
             return
-        entry = {"t": self._stamp(), "speaker": speaker, "text": text}
+        entry = {"t": round(t, 2) if t is not None else self._stamp(),
+                 "speaker": speaker, "text": text}
         self.lines.append(entry)
         mmss = f"{int(entry['t']) // 60}:{int(entry['t']) % 60:02d}"
         print(f"  [{mmss}] {speaker}: {text}")
@@ -43,11 +54,12 @@ class Transcript:
         return self._stamp()
 
     def save(self, audio_name: str, duration_s: float) -> Path:
+        self.lines.sort(key=lambda l: l["t"])
         txt_path = self.path_stem.with_suffix(".txt")
         header = [
             f"Call:        {self.path_stem.name}",
             f"Scenario:    {self.scenario.id} — {self.scenario.label}",
-            f"Target:      Pretty Good AI test line (+1-805-439-8008)",
+            f"Dialed:      {self.dialed}{'' if self.dialed == config.TARGET_NUMBER else '   *** SELF-TEST, NOT A SUBMISSION CALL ***'}",
             f"Audio:       {audio_name}",
             f"Duration:    {int(duration_s) // 60}:{int(duration_s) % 60:02d}",
             "",

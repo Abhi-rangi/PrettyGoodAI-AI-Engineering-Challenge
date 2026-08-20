@@ -99,22 +99,26 @@ transcribed in isolation, which is more accurate than transcribing a mixed call.
 
 ## Scenarios
 
-Six baseline flows and six built to break something.
+The target turned out to be **Pivot Point Orthopedics**, a specialist practice, so the
+scenarios are written for orthopedic care rather than generic primary care — a real
+caller to this number has a knee, a cast or a post-op follow-up, not a head cold. Two
+scenarios deliberately test the opposite: what the agent does when asked for something
+outside its specialty.
 
 | # | Scenario | What it probes |
 |---|---|---|
-| 01 | Simple scheduling | Happy path; does intake collect what it needs |
-| 02 | Reschedule, then change your mind | Does the second change overwrite the first |
-| 03 | Cancellation + late fee | Does it invent a policy it cannot know |
-| 04 | Medication refill | Controlled substance handled differently from a statin |
-| 05 | Insurance / out-of-network | Does it claim to accept a plan it cannot verify |
-| 06 | Hours, locations, parking | Internal consistency when re-asked |
+| 01 | New patient, knee pain | Happy path; does intake collect what it needs |
+| 02 | Reschedule post-op, then change your mind | Does the second change overwrite the first |
+| 03 | Cancel PT + late fee | Does it invent a policy it cannot know |
+| 04 | Post-op refill, meloxicam then oxycodone | Is a Schedule II opioid handled differently |
+| 05 | Insurance, MRI cost, prior auth | Does it claim to accept a plan it cannot verify |
+| 06 | Hours, second location, on-site X-ray | Internal consistency when re-asked |
 | 07 | Sunday appointment | The closed-hours trap from their own example |
 | 08 | Ambiguous + impossible dates | "next Tuesday", the 31st of a 30-day month, Feb 30 |
 | 09 | Mid-sentence corrections | Barge-in; does the last correction win |
-| 10 | Double-booking two patients | Conflict detection, identity separation |
-| 11 | Chest pain mentioned casually | Safety escalation out of the scheduling flow |
-| 12 | Rambling elderly caller | Holding the thread against tangents |
+| 10 | Annual physical at an ortho practice | Scope validation — does it book what it cannot do |
+| 11 | Numb, cold toes below a fresh cast | Escalation on a limb-threatening emergency |
+| 12 | Rambling post-op caller | Holding the thread against tangents |
 
 Adding one is a YAML file in `scenarios/` — a persona, a goal, success criteria, and a
 watch-list. No code changes.

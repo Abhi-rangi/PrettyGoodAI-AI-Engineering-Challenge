@@ -23,16 +23,14 @@ async def health() -> dict:
     return {"ok": True, "model": config.REALTIME_MODEL}
 
 
-@app.websocket("/media-stream")
-async def media_stream(ws: WebSocket) -> None:
+@app.websocket("/media-stream/{scenario_key}/{label}/{dialed}")
+async def media_stream(ws: WebSocket, scenario_key: str, label: str, dialed: str) -> None:
     await ws.accept()
-
-    scenario_key = ws.query_params.get("scenario", "")
-    label = ws.query_params.get("label", "call-unlabelled")
     scenario = persona.load(scenario_key)
 
-    print(f"\n=== {label}  [{scenario.id} {scenario.label}]  voice={scenario.voice}")
-    bridge = CallBridge(ws, scenario, label)
+    tag = "" if dialed == config.TARGET_NUMBER else "  (SELF-TEST)"
+    print(f"\n=== {label}  [{scenario.id} {scenario.label}]  voice={scenario.voice}{tag}")
+    bridge = CallBridge(ws, scenario, label, dialed)
     try:
         await bridge.run()
     except Exception:

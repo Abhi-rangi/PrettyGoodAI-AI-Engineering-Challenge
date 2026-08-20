@@ -73,16 +73,26 @@ def check_twilio() -> bool:
         account = client.api.accounts(config.TWILIO_ACCOUNT_SID).fetch()
 
         numbers = [n.phone_number for n in client.incoming_phone_numbers.list()]
+        if not numbers:
+            print(f"{FAIL} This account owns no phone numbers yet.")
+            print( "       Console -> Phone Numbers -> Manage -> Buy a number, tick Voice.")
+            print( "       The number shown in Twilio's onboarding 'Try out Voice' panel is a")
+            print( "       shared demo number, not yours — it will not work as a caller ID.")
+            return False
         if config.TWILIO_FROM_NUMBER not in numbers:
-            print(f"{FAIL} {config.TWILIO_FROM_NUMBER} is not on this account. Owned: {numbers}")
+            print(f"{FAIL} TWILIO_FROM_NUMBER {config.TWILIO_FROM_NUMBER} is not on this account.")
+            print(f"       Numbers you own: {', '.join(numbers)}")
             return False
 
         print(f"{PASS} Twilio account '{account.friendly_name}' [{account.type}], "
               f"calling from {config.TWILIO_FROM_NUMBER}")
         if account.type == "Trial":
-            print(f"{FAIL} This is a TRIAL account. It can only dial verified numbers, "
-                  f"and {config.TARGET_NUMBER} cannot be verified. Upgrade before calling.")
-            return False
+            verified = [c.phone_number for c in client.outgoing_caller_ids.list()]
+            print(f"{WARN} Trial account — outbound calls only reach verified numbers.")
+            print(f"       Verified: {verified or 'none yet'}")
+            print(f"       {config.TARGET_NUMBER} cannot be verified (it is not your line),")
+            print(f"       so submission calls need a paid upgrade. Self-tests are fine:")
+            print(f"       python run_call.py --scenario 01 --to <your mobile>")
         return True
     except Exception as exc:
         print(f"{FAIL} Twilio check failed: {exc}")

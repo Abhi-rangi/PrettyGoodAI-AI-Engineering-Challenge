@@ -10,6 +10,7 @@ guarantees the call cannot hang or run past its budget.
 """
 import asyncio
 import base64
+from collections import deque
 import json
 import os
 import time
@@ -99,12 +100,13 @@ def build_session_config(scenario: Scenario) -> dict:
 
 
 class CallBridge:
-    def __init__(self, twilio_ws: WebSocket, scenario: Scenario, label: str):
+    def __init__(self, twilio_ws: WebSocket, scenario: Scenario, label: str,
+                 dialed: str = ""):
         self.twilio_ws = twilio_ws
         self.scenario = scenario
         self.stem: Path = config.CALL_DIR / label
         self.recorder = Recorder(self.stem)
-        self.transcript = Transcript(self.stem, scenario)
+        self.transcript = Transcript(self.stem, scenario, dialed)
 
         self.stream_sid: str | None = None
         self.call_sid: str | None = None
@@ -126,6 +128,15 @@ class CallBridge:
         # turn ends before they start. Both are quality evidence.
         self.agent_stopped_at: float | None = None
         self.bot_finished_at: float | None = None
+
+        # When each side began talking. Queues, not single slots: transcription lands
+        # well after the audio, so two or three turns can be outstanding at once and a
+        # single variable would stamp them all with the most recent start time.
+        self.agent_turn_starts: deque[float] = deque()
+        self.patient_turn_starts: deque[float] = deque()
+        self.agent_speaking = False
+        self.turn_seq = 0
+        self.current_response_id: str | None = None
         self.started_at = time.monotonic()
 
     # ------------------------------------------------------------------- run
@@ -143,6 +154,7 @@ class CallBridge:
             done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
             for task in pending:
                 task.cancel()
+            await self._drain_transcripts(openai_ws)
             for task in done:  # surface exceptions rather than swallowing them
                 if task.exception():
                     raise task.exception()
@@ -169,6 +181,11 @@ class CallBridge:
                     self.stream_sid = start["streamSid"]
                     self.call_sid = start["callSid"]
                     print(f"  stream open  call={self.call_sid}")
+
+                elif event == "mark" and msg.get("mark", {}).get("name", "").startswith("turn-"):
+                    # Our audio has finished leaving the speaker. Start the clock on how
+                    # long the agent takes to reply.
+                    self.bot_finished_at = None if self.agent_speaking else self.transcript.now()
 
                 elif event == "mark" and msg.get("mark", {}).get("name") == "goodbye":
                     # Twilio finished playing everything queued before this mark, so
@@ -197,6 +214,12 @@ class CallBridge:
                 self._log_error(event)
 
             elif etype == "response.output_audio.delta":
+                # Key off the response id, not a speaking flag: barge-in clears the
+                # flag mid-response, which would queue a second start time for a turn
+                # that only produces one transcript and shift every later timestamp.
+                if event.get("response_id") != self.current_response_id:
+                    self.current_response_id = event.get("response_id")
+                    self.patient_turn_starts.append(self.transcript.now())
                 if self.agent_stopped_at is not None:
                     self.transcript.add_metric(
                         "latency", who="patient",
@@ -214,6 +237,9 @@ class CallBridge:
 
             elif etype == "input_audio_buffer.speech_started":
                 self.heard_anything = True
+                if not self.agent_speaking:
+                    self.agent_turn_starts.append(self.transcript.now())
+                self.agent_speaking = True
                 if self.bot_finished_at is not None:
                     self.transcript.add_metric(
                         "latency", who="agent",
@@ -223,12 +249,13 @@ class CallBridge:
 
             elif etype == "input_audio_buffer.speech_stopped":
                 self.agent_stopped_at = self.transcript.now()
+                self.agent_speaking = False
 
             elif etype == "conversation.item.input_audio_transcription.completed":
-                self.transcript.add("AGENT", event.get("transcript", ""))
+                self._add_turn("AGENT", event.get("transcript", ""))
 
             elif etype == "response.output_audio_transcript.done":
-                self.transcript.add("PATIENT", event.get("transcript", ""))
+                self._add_turn("PATIENT", event.get("transcript", ""))
 
             elif etype == "response.function_call_arguments.done":
                 if event.get("name") == "end_call":
@@ -240,13 +267,53 @@ class CallBridge:
                     self.transcript.add_event("bot chose to hang up:", self.hangup_reason)
 
             elif etype == "response.done":
-                self.bot_finished_at = self.transcript.now()
+                # Only start the clock if the line actually went quiet. If the agent is
+                # already mid-utterance when our turn ends, the next speech_started is
+                # just the far side pausing and resuming — timing to it measures their
+                # sentence length, not their response delay. An early version of this
+                # reported an 18-second "silence" on a call whose audio contained no
+                # gap longer than 2.4 seconds.
+                self.bot_finished_at = None if self.agent_speaking else self.transcript.now()
+                self.patient_turn_started = None
                 self.bot_is_speaking = False
                 self.response_start_ts = None
                 if self.pending_hangup:
                     # Queues behind all audio already sent; Twilio echoes it back once
                     # the goodbye has actually played out of the far end's speaker.
                     await self._send_mark("goodbye")
+
+    def _add_turn(self, speaker: str, text: str) -> None:
+        queue = self.agent_turn_starts if speaker == "AGENT" else self.patient_turn_starts
+        started = queue.popleft() if queue else None
+        self.transcript.add(speaker, text, t=started)
+
+    async def _drain_transcripts(self, openai_ws, seconds: float = 3.0) -> None:
+        """Collect transcripts that were still in flight when the call ended.
+
+        Whisper finishes well after the audio it describes, so the last few turns of a
+        call are still being transcribed when we hang up. Closing the socket
+        immediately silently dropped them: one call had thirty seconds of agent speech
+        in the recording and no matching lines in the transcript. Both sides of every
+        call are a hard requirement, so we wait briefly for the stragglers.
+        """
+        loop = asyncio.get_event_loop()
+        deadline = loop.time() + seconds
+        recovered = 0
+        while (remaining := deadline - loop.time()) > 0:
+            try:
+                raw = await asyncio.wait_for(openai_ws.recv(), timeout=remaining)
+            except Exception:
+                break
+            event = json.loads(raw)
+            etype = event.get("type", "")
+            if etype == "conversation.item.input_audio_transcription.completed":
+                self._add_turn("AGENT", event.get("transcript", ""))
+                recovered += 1
+            elif etype == "response.output_audio_transcript.done":
+                self._add_turn("PATIENT", event.get("transcript", ""))
+                recovered += 1
+        if recovered:
+            print(f"  recovered {recovered} late transcript line(s)")
 
     def _log_error(self, event: dict) -> None:
         err = event.get("error", {}) or {}
@@ -361,7 +428,8 @@ class CallBridge:
         audio_path, _ = self.recorder.save()
         txt = self.transcript.save(audio_path.name, self.recorder.duration_s)
         mins, secs = divmod(int(self.recorder.duration_s), 60)
-        turns = sum(1 for line in self.transcript.lines if line["speaker"] != "EVENT")
+        turns = sum(1 for line in self.transcript.lines
+                    if line["speaker"] in ("AGENT", "PATIENT"))
         agent_turns = sum(1 for line in self.transcript.lines if line["speaker"] == "AGENT")
         print(f"  saved {audio_path.name} + {txt.name}  ({mins}:{secs:02d}, {turns} turns)")
         if agent_turns == 0 and self.recorder.duration_s > 5:

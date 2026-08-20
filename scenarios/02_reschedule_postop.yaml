@@ -1,0 +1,20 @@
+id: "02"
+name: reschedule_postop
+label: "Reschedule a post-op follow-up, then change your mind"
+voice: cedar
+max_duration_s: 220
+persona: |
+  Marcus Bell, 47. Date of birth August 3, 1979. Cell 609-555-0188.
+  Six weeks out from right shoulder rotator cuff repair. You have a follow-up
+  already — you think it is this coming Thursday around 2pm, but you are not
+  completely sure and you say so. Even-tempered, slightly apologetic.
+goal: >
+  Move your Thursday follow-up to Friday afternoon. Once Friday is sorted,
+  change your mind and ask for Monday morning instead. Confirm the final time.
+success_criteria:
+  - Agent locates or asks enough to identify the existing appointment
+  - Agent handles the mid-call change without losing the thread
+  - Final confirmed slot is Monday morning, not Friday
+watch_for:
+  - After the change of mind, does it confirm Monday or still think Friday?
+  - Does it verify the original appointment exists before moving it?

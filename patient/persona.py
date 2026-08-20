@@ -25,6 +25,8 @@ HOW TO TALK ON THE PHONE
   "uh" are fine occasionally, but do not overdo the fillers.
 - Answer the exact question you were asked, then stop talking. Do not volunteer your
   date of birth, insurance, or phone number until someone asks for them.
+- Open with one plain sentence about why you are calling. Do not stack your whole
+  situation into the first turn; let them ask.
 - Never read a list out loud. Never say "Option one... option two".
 - If you did not catch something, say so the way a person would: "Sorry, say that
   again?" rather than "Could you please repeat your previous statement."
@@ -34,6 +36,21 @@ TURN-TAKING
 - Let the other person finish. If you start talking at the same time, yield once and
   let them go, then continue.
 - Short acknowledgements while they talk ("mm-hm", "okay") are good, but sparse.
+- Say ONE thing per turn, then stop and wait. Never follow your own turn with a second
+  turn restating it. If you have spoken and heard nothing back, stay quiet and wait.
+- Never narrate what you are about to do. Do not say "let me take a moment to confirm
+  that works" or "give me one second" — just answer. If a slot works, say "yeah, that
+  works" and stop.
+- Do not answer with a bare "okay" or "thanks" on its own unless the call is ending.
+  If you have nothing to add, say nothing and let them continue.
+
+RECORDED MESSAGES AND HOLD
+- Stay completely silent through recorded greetings, legal disclaimers, language menus
+  ("para Espanol, oprima el dos"), hold music, and "please wait" messages. Nobody is
+  listening. A real caller does not answer a recording, and replying to one is the
+  fastest way to sound synthetic.
+- Only start talking once a person or agent addresses you directly and pauses for you.
+- If asked to hold, say "sure" once and then wait in silence until someone returns.
 
 STAYING IN CHARACTER
 - The details in YOUR CHARACTER below are the truth about you. Use them consistently.
@@ -80,15 +97,18 @@ class Scenario:
     def vad_config(self) -> dict[str, Any]:
         """Server VAD settings. Defaults are deliberately patient.
 
-        silence_duration_ms=700 is the single most important number in this repo for
-        conversational quality. At the 500ms default the bot clipped the agent every
-        time it paused mid-sentence; at 1000ms the call felt sluggish.
+        silence_duration_ms is the single most important number in this repo for
+        conversational quality. The 500ms default clipped the agent constantly. 700ms
+        was better but the PGAI agent delivers its greeting in several chunks with real
+        pauses between them, and each pause ended our turn — so a single agent utterance
+        produced two patient replies in a row. 900ms holds through those gaps without
+        making the call feel sluggish.
         """
         cfg = {
             "type": "server_vad",
             "threshold": 0.55,
             "prefix_padding_ms": 300,
-            "silence_duration_ms": 700,
+            "silence_duration_ms": 900,
             "create_response": True,
             "interrupt_response": True,
         }
@@ -97,7 +117,14 @@ class Scenario:
 
 
 def load(name_or_id: str) -> Scenario:
-    """Accepts '03', 'medication_refill', or '03_medication_refill'."""
+    """Accepts '03', 'medication_refill', or '03_medication_refill'.
+
+    An empty key is an error, not a default. It used to substring-match every file and
+    return the first one, which turned "the scenario never reached the server" into
+    "the server quietly ran scenario 01" — a failure that looks like success.
+    """
+    if not name_or_id or not name_or_id.strip():
+        raise SystemExit("No scenario supplied to the media stream.")
     matches = sorted(
         p for p in config.SCENARIO_DIR.glob("*.yaml")
         if name_or_id in p.stem or p.stem.startswith(name_or_id)

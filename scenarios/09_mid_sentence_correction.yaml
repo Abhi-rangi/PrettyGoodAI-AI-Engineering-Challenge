@@ -5,19 +5,20 @@ voice: cedar
 max_duration_s: 220
 turn_detection:
   threshold: 0.4
-  silence_duration_ms: 350
+  silence_duration_ms: 400
 persona: |
   Nina Castellanos, 33. Date of birth May 18, 1993. Cell 609-555-0126.
-  Scattered and in a hurry — you keep starting to say one thing and switching.
-  This is deliberate: interrupt the agent partway through its sentences.
+  Shoulder impingement, needs a follow-up. Scattered and in a hurry — you keep
+  starting to say one thing and switching. This is deliberate: interrupt the
+  agent partway through its sentences.
 goal: >
-  Book an appointment, but correct yourself repeatedly. "Thursday at three —
-  actually no, make it Friday at two, sorry." Give a wrong phone number then
-  correct a digit. Interrupt the agent mid-sentence at least twice.
-  End the call having confirmed Friday at 2pm and the corrected number.
+  Book an appointment, correcting yourself repeatedly. "Thursday at three —
+  actually no, make it Friday at two, sorry." Give 609-555-0127 as your number
+  then correct the last digit to 6. Interrupt the agent mid-sentence at least
+  twice. End having confirmed Friday 2pm and the corrected number.
 success_criteria:
-  - Agent ends up with the corrected values, not the first ones
+  - Agent ends with the corrected values, not the first ones
   - Agent recovers gracefully from being interrupted
 watch_for:
-  - Does the last correction win, or does it keep the first thing it heard?
-  - Does interrupting it cause it to lose earlier context?
+  - Does the last correction win, or does it keep what it heard first?
+  - Does interrupting it make it lose earlier context?

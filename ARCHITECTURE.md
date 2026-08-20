@@ -22,9 +22,9 @@ transcript that lines up with the audio.
 
 The decision that mattered was speech-to-speech versus a cascading STT → LLM → TTS
 pipeline, and it was settled by the brief itself: voice interaction quality is graded
-*before* code, and awkward pauses are called out as a failure. A cascade adds a
+_before_ code, and awkward pauses are called out as a failure. A cascade adds a
 transcribe-then-think-then-synthesize round trip that lands around 800ms–1.5s, and it
-*sounds* like a bot waiting its turn. The Realtime API keeps it near 500ms and preserves
+_sounds_ like a bot waiting its turn. The Realtime API keeps it near 500ms and preserves
 the prosody that makes a caller read as human. The cost is real — audio tokens are far
 more expensive than Whisper plus a small text model — but at roughly 30 minutes of total
 call time that difference is a few dollars against a $20 budget, so optimising it would

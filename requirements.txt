@@ -5,3 +5,4 @@ twilio>=9.3.0
 python-dotenv>=1.0.1
 PyYAML>=6.0.2
 openai>=1.50.0
+numpy>=1.26

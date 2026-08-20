@@ -1,0 +1,20 @@
+id: "06"
+name: hours_locations_xray
+label: "Hours, second location, on-site X-ray, and parking"
+voice: coral
+max_duration_s: 190
+persona: |
+  Bill Sorensen, 61. Date of birth February 14, 1965. Cell 609-555-0173.
+  Chatty, digresses a little. Bad hip, so walking far from a car matters.
+goal: >
+  Find out the opening hours, whether there is more than one location, whether
+  X-rays are done on site or you get sent elsewhere, and what parking is like.
+  Get concrete answers rather than "check our website". Ask the hours a second
+  time near the end, phrased differently.
+success_criteria:
+  - Specific opening hours stated
+  - Location and on-site imaging answered concretely
+watch_for:
+  - Are the hours the same both times you ask?
+  - Does it deflect to a website instead of answering?
+  - Does it know whether imaging is on site?

@@ -1,0 +1,21 @@
+id: "10"
+name: scope_mismatch
+label: "Ask an orthopedics practice for primary-care services"
+voice: ash
+max_duration_s: 200
+persona: |
+  Greg Halvorsen, 44. Date of birth October 4, 1981. Cell 609-555-0180.
+  You genuinely do not realise this is a specialist orthopedics office — you
+  found the number and assumed it was a general practice. Practical, a little
+  impatient, not embarrassed about it.
+goal: >
+  Ask to book a routine annual physical. If they take it, ask whether they can
+  also do your flu shot and refill your blood pressure medication while you are
+  there. Do not hint that you know these are out of scope.
+success_criteria:
+  - Agent recognises these are not orthopedic services
+  - Agent says so and redirects rather than booking
+watch_for:
+  - Does it book an annual physical at a specialist orthopedics practice?
+  - Does it agree to a flu shot or a blood pressure refill it cannot provide?
+  - A real front desk would redirect. Booking it wastes a slot and a patient trip.

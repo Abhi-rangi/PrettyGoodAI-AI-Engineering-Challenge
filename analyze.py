@@ -4,6 +4,7 @@
     python analyze.py stats     # did the calls clear the 1-3 minute bar?
     python analyze.py repair    # rebuild a transcript from audio if a side went missing
     python analyze.py report    # worksheet of bug candidates to verify by hand
+    python analyze.py audio     # objective call-quality measurements from the recordings
 
 `report` is deliberately heuristic rather than LLM-driven. It flags moments worth
 listening to and cites a timestamp; deciding whether something is actually a bug is a
@@ -221,8 +222,14 @@ MONEY = re.compile(r"\$\s?\d[\d,]*(?:\.\d{2})?|\b\d+ dollars\b", re.I)
 CONTROLLED = re.compile(r"\b(adderall|oxycodone|xanax|percocet|ritalin|vicodin|amphetamine)\b", re.I)
 REFILL_OK = re.compile(r"\b(refill(ed)?|sent (it )?(over|to)|called (it )?in|processed)\b", re.I)
 EMERGENCY_SYMPTOM = re.compile(
-    r"\b(chest (pain|tightness)|short(ness)? of breath|can't breathe|numb|stroke)\b", re.I)
-EMERGENCY_RESPONSE = re.compile(r"\b(911|emergency room|\bER\b|urgent care|ambulance|hang up and call)\b", re.I)
+    r"\b(chest (pain|tightness)|short(ness)? of breath|can't breathe|stroke"
+    r"|numb|numbness|cold (toes|fingers|foot)|cast (feels )?(very )?tight"
+    r"|can't feel my (toes|fingers))\b", re.I)
+EMERGENCY_RESPONSE = re.compile(
+    r"\b(911|emergency room|\bER\b|urgent care|ambulance|hang up and call"
+    r"|on.call (surgeon|doctor|provider)|go to the hospital|right away|immediately)\b", re.I)
+# Services an orthopedics practice does not provide. Booking these is a scope failure.
+OUT_OF_SCOPE = re.compile(r"\b(annual physical|flu shot|vaccin\w*|blood pressure (med|medication|pill))\b", re.I)
 IMPOSSIBLE_DATE = re.compile(r"\bfebruary\s+3[01]\b|\b(april|june|september|november)\s+31\b", re.I)
 UNCERTAIN = re.compile(r"\b(i (don't|do not) (know|have)|i'm not sure|check our website|can't help)\b", re.I)
 
@@ -277,6 +284,9 @@ def _scan(call: Call) -> list[tuple[str, str, str]]:
             found.append(("Confirmed a booking with no date or time in it", stamp, text))
         if UNCERTAIN.search(text):
             found.append(("Deflected instead of answering", stamp, text))
+        if BOOKING_CONFIRMED.search(text) and OUT_OF_SCOPE.search(patient_said):
+            found.append(("Booked a service this specialty practice does not provide",
+                          stamp, text))
 
     # Repeated identical agent turns usually mean a stuck loop.
     seen: dict[str, str] = {}
@@ -309,6 +319,63 @@ def _slow_replies(call: Call, threshold_ms: int = 3500, cap: int = 3) -> list[tu
     return sorted(slow, key=lambda x: -x[1])[:cap]
 
 
+# ------------------------------------------------------------------------ audio
+
+def cmd_audio(_args) -> None:
+    """Measure call quality from the recordings instead of judging it by ear.
+
+    The brief grades pacing, overlap and audio cleanliness before it reads any code, so
+    these are numbers worth having rather than impressions. Because the recording keeps
+    each speaker on its own channel, overlap and talk-time fall straight out of a frame
+    energy comparison — no diarisation needed.
+    """
+    try:
+        import numpy as np
+    except ImportError:
+        sys.exit("pip install numpy")
+    import wave
+
+    print(f"\n{'call':<32} {'dur':>5} {'agent%':>7} {'bot%':>6} {'both%':>6} "
+          f"{'peak dBFS':>10} {'clip':>5}  worst overlap")
+    print("-" * 100)
+
+    for call in load_calls():
+        if not call.audio:
+            continue
+        tmp = Path(f"/tmp/{call.name}-an.wav")
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(call.audio),
+                        "-ac", "2", "-ar", "8000", str(tmp)], check=True)
+        with wave.open(str(tmp)) as w:
+            raw = w.readframes(w.getnframes())
+        tmp.unlink(missing_ok=True)
+        pcm = np.frombuffer(raw, dtype="<i2").reshape(-1, 2).astype(np.float32) / 32768
+        agent, bot = pcm[:, 0], pcm[:, 1]
+
+        sr, flen = 8000, 160  # 20 ms frames
+        def energy(x):
+            m = len(x) // flen * flen
+            return np.sqrt((x[:m].reshape(-1, flen) ** 2).mean(axis=1))
+        ea, eb = energy(agent), energy(bot)
+        # Threshold above the channel's own noise floor, so line hiss is not speech.
+        sa = ea > max(np.percentile(ea, 20) * 4, 0.004)
+        sb = eb > max(np.percentile(eb, 20) * 4, 0.004)
+
+        both, worst, run = sa & sb, 0.0, 0
+        for flag in both:
+            run = run + 1 if flag else 0
+            worst = max(worst, run * 0.02)
+        clip = int((np.abs(agent) > 0.99).sum() + (np.abs(bot) > 0.99).sum())
+        peak = 20 * np.log10(max(np.abs(bot).max(), 1e-9))
+
+        print(f"{call.name:<32} {mmss(len(agent)/sr):>5} {sa.mean()*100:6.1f}% "
+              f"{sb.mean()*100:5.1f}% {both.mean()*100:5.1f}% {peak:9.1f} {clip:5}  "
+              f"{worst:.2f}s")
+
+    print("-" * 100)
+    print("both% is cross-talk. Under ~3% with no long overlaps means turn-taking held.")
+    print("clip > 0 means distortion; peak below -30 dBFS means our side was too quiet.\n")
+
+
 # ------------------------------------------------------------------------ main
 
 def main() -> None:
@@ -319,8 +386,10 @@ def main() -> None:
     rep = sub.add_parser("repair", help="rebuild transcripts from audio")
     rep.add_argument("--all", action="store_true", help="repair every call, not just broken ones")
     sub.add_parser("report", help="write bug-candidates.md")
+    sub.add_parser("audio", help="objective call-quality measurements")
     args = ap.parse_args()
-    {"stats": cmd_stats, "repair": cmd_repair, "report": cmd_report}[args.cmd](args)
+    {"stats": cmd_stats, "repair": cmd_repair,
+     "report": cmd_report, "audio": cmd_audio}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,11 @@ TRANSCRIBE_MODEL = os.getenv("OPENAI_TRANSCRIBE_MODEL", "whisper-1")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
-TARGET_NUMBER = os.getenv("TARGET_NUMBER", "+18054398008")
+# Fixed by the assessment brief. Deliberately NOT read from the environment: the
+# submission requires every graded call to go to this number, and an .env typo that
+# silently redirected them would be invisible until review. Use `run_call.py --to`
+# for rehearsal calls; those are labelled selftest-* and excluded from the results.
+TARGET_NUMBER = "+18054398008"
 
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "").replace("https://", "").replace("http://", "").rstrip("/")
 PORT = int(os.getenv("PORT", "5050"))
