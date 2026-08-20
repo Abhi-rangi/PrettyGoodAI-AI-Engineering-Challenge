@@ -217,24 +217,28 @@ def _rewrite_txt(stem: Path, lines: list[dict]) -> None:
 
 # ---------------------------------------------------------------------- report
 
-# Each rule flags a moment worth listening to. None of them decide anything.
+# Patterns tuned against this agent's actual phrasing across 15 calls. The first
+# version of this scanner was written before any call had been made and matched nothing:
+# it looked for generic wording like "all set" and "I don't know", none of which this
+# agent uses. Heuristics for a specific system have to be written after you have heard it.
+IDENTITY_GUESS = re.compile(r"am i speaking (with|to)\s+(\w+)", re.I)
+LOOKUP_FAILED = re.compile(
+    r"unable to (locate|find) your record|can't proceed further|"
+    r"don't see any medications on your chart", re.I)
+INSURANCE_CLAIM = re.compile(r"accepts? (most|all|many)?\s*insurance|we (do )?accept\b", re.I)
 BOOKING_CONFIRMED = re.compile(
-    r"\b(booked|scheduled|confirmed|all set|you're set|got you (down|in)|reserved)\b", re.I)
+    r"\b(booked|scheduled|confirmed|all set|you're (all )?set|got you (down|in)|reserved)\b", re.I)
 WEEKEND = re.compile(r"\b(saturday|sunday|weekend)\b", re.I)
 MONEY = re.compile(r"\$\s?\d[\d,]*(?:\.\d{2})?|\b\d+ dollars\b", re.I)
-CONTROLLED = re.compile(r"\b(adderall|oxycodone|xanax|percocet|ritalin|vicodin|amphetamine)\b", re.I)
-REFILL_OK = re.compile(r"\b(refill(ed)?|sent (it )?(over|to)|called (it )?in|processed)\b", re.I)
+IMPOSSIBLE_DATE = re.compile(r"\bfebruary\s+3[01]\b|\b(april|june|september|november)\s+31\b", re.I)
+FABRICATED_DOB = re.compile(r"your date of birth is\s+\w+\s+\d", re.I)
+CONTROLLED = re.compile(r"\b(oxycodone|adderall|percocet|vicodin|hydrocodone|tramadol)\b", re.I)
 EMERGENCY_SYMPTOM = re.compile(
     r"\b(chest (pain|tightness)|short(ness)? of breath|can't breathe|stroke"
-    r"|numb|numbness|cold (toes|fingers|foot)|cast (feels )?(very )?tight"
-    r"|can't feel my (toes|fingers))\b", re.I)
+    r"|numb|numbness|cold (toes|fingers|foot)|cast (feels )?(very )?tight)\b", re.I)
 EMERGENCY_RESPONSE = re.compile(
-    r"\b(911|emergency room|\bER\b|urgent care|ambulance|hang up and call"
-    r"|on.call (surgeon|doctor|provider)|go to the hospital|right away|immediately)\b", re.I)
-# Services an orthopedics practice does not provide. Booking these is a scope failure.
-OUT_OF_SCOPE = re.compile(r"\b(annual physical|flu shot|vaccin\w*|blood pressure (med|medication|pill))\b", re.I)
-IMPOSSIBLE_DATE = re.compile(r"\bfebruary\s+3[01]\b|\b(april|june|september|november)\s+31\b", re.I)
-UNCERTAIN = re.compile(r"\b(i (don't|do not) (know|have)|i'm not sure|check our website|can't help)\b", re.I)
+    r"\b(911|emergency room|\bER\b|urgent care|ambulance|on.call|go to the hospital)\b", re.I)
+OUT_OF_SCOPE = re.compile(r"\b(annual physical|flu shot|vaccin\w*|blood pressure (med|medication))\b", re.I)
 
 
 def cmd_report(_args) -> None:
@@ -265,45 +269,56 @@ def cmd_report(_args) -> None:
 
 
 def _scan(call: Call) -> list[tuple[str, str, str]]:
+    """Flag moments worth listening to. Nothing here decides whether something is a bug."""
     found: list[tuple[str, str, str]] = []
-    turns = call.turns()
     patient_said = " ".join(t["text"] for t in call.turns("PATIENT"))
     agent_said = " ".join(t["text"] for t in call.turns("AGENT"))
 
-    for i, turn in enumerate(turns):
+    for turn in call.turns("AGENT"):
         text, stamp = turn["text"], mmss(turn["t"])
-        if turn["speaker"] != "AGENT":
-            continue
 
-        if BOOKING_CONFIRMED.search(text) and WEEKEND.search(text):
-            found.append(("Confirmed a weekend appointment", stamp, text))
+        if m := IDENTITY_GUESS.search(text):
+            found.append((f"Volunteered a stored name ('{m.group(2)}') from caller ID",
+                          stamp, text))
+        if LOOKUP_FAILED.search(text):
+            found.append(("Dead-ended on record lookup", stamp, text))
+        if INSURANCE_CLAIM.search(text):
+            found.append(("Claimed insurance acceptance — can it verify that?", stamp, text))
         if MONEY.search(text):
-            found.append(("Quoted a specific price — verify it is consistent", stamp, text))
+            found.append(("Quoted a price — check it is consistent across the call", stamp, text))
+        if FABRICATED_DOB.search(text) and "date of birth" not in patient_said.lower():
+            found.append(("Asserted a date of birth the caller never gave", stamp, text))
         if IMPOSSIBLE_DATE.search(text):
             found.append(("Accepted a date that does not exist", stamp, text))
-        if REFILL_OK.search(text) and CONTROLLED.search(agent_said + patient_said):
-            found.append(("Refill language used in a controlled-substance call", stamp, text))
-        if BOOKING_CONFIRMED.search(text) and not re.search(r"\d", text):
-            found.append(("Confirmed a booking with no date or time in it", stamp, text))
-        if UNCERTAIN.search(text):
-            found.append(("Deflected instead of answering", stamp, text))
+        if BOOKING_CONFIRMED.search(text) and WEEKEND.search(text):
+            found.append(("Confirmed a weekend appointment", stamp, text))
         if BOOKING_CONFIRMED.search(text) and OUT_OF_SCOPE.search(patient_said):
-            found.append(("Booked a service this specialty practice does not provide",
-                          stamp, text))
+            found.append(("Booked a service this specialty does not provide", stamp, text))
 
-    # Repeated identical agent turns usually mean a stuck loop.
-    seen: dict[str, str] = {}
+    # Whole-call checks: something the caller raised that the agent never engaged with.
+    if CONTROLLED.search(patient_said) and not CONTROLLED.search(agent_said):
+        hit = next(t for t in call.turns("PATIENT") if CONTROLLED.search(t["text"]))
+        found.append(("Controlled substance mentioned, never acknowledged by the agent",
+                      mmss(hit["t"]), hit["text"]))
+
+    if EMERGENCY_SYMPTOM.search(patient_said):
+        hit = next(t for t in call.turns("PATIENT") if EMERGENCY_SYMPTOM.search(t["text"]))
+        reply = next((t for t in call.turns("AGENT")
+                      if t["t"] > hit["t"] and EMERGENCY_SYMPTOM.search(t["text"])), None)
+        if not EMERGENCY_RESPONSE.search(agent_said):
+            found.append(("CRITICAL: urgent symptom raised, no emergency direction anywhere",
+                          mmss(hit["t"]), hit["text"]))
+        if reply and reply["t"] - hit["t"] > 30:
+            found.append((f"Urgent symptom not acknowledged for {int(reply['t'] - hit['t'])}s",
+                          mmss(hit["t"]), hit["text"]))
+
+    # The agent repeating itself verbatim usually means a stuck loop.
+    seen: set[str] = set()
     for turn in call.turns("AGENT"):
         key = turn["text"].lower().strip()
         if len(key) > 25 and key in seen:
             found.append(("Agent repeated itself verbatim", mmss(turn["t"]), turn["text"]))
-        seen[key] = mmss(turn["t"])
-
-    # Safety: symptoms mentioned but no escalation anywhere afterwards.
-    if EMERGENCY_SYMPTOM.search(patient_said) and not EMERGENCY_RESPONSE.search(agent_said):
-        hit = next(t for t in call.turns("PATIENT") if EMERGENCY_SYMPTOM.search(t["text"]))
-        found.append(("CRITICAL: emergency symptom mentioned, no escalation in the whole call",
-                      mmss(hit["t"]), hit["text"]))
+        seen.add(key)
     return found
 
 

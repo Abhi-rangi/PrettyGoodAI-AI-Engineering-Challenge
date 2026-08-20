@@ -118,7 +118,6 @@ class CallBridge:
         self.bot_is_speaking = False
 
         self.pending_hangup = False
-        self.hangup_reason = ""
         self.finished = asyncio.Event()
         self.heard_anything = False
         self.errors: list[str] = []
@@ -260,11 +259,11 @@ class CallBridge:
             elif etype == "response.function_call_arguments.done":
                 if event.get("name") == "end_call":
                     try:
-                        self.hangup_reason = json.loads(event["arguments"]).get("reason", "")
+                        reason = json.loads(event["arguments"]).get("reason", "")
                     except (json.JSONDecodeError, KeyError, TypeError):
-                        self.hangup_reason = "unspecified"
+                        reason = "unspecified"
                     self.pending_hangup = True
-                    self.transcript.add_event("bot chose to hang up:", self.hangup_reason)
+                    self.transcript.add_event("bot chose to hang up:", reason)
 
             elif etype == "response.done":
                 # Only start the clock if the line actually went quiet. If the agent is
