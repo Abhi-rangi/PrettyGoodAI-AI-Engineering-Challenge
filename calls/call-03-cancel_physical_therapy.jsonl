@@ -1,0 +1,26 @@
+{"t": 0.78, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?"}
+{"t": 14.47, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 510}
+{"t": 14.47, "speaker": "PATIENT", "text": "Hi, I need to cancel my physical therapy appointment for tomorrow."}
+{"t": 21.74, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6920}
+{"t": 21.74, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 26.62, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 480}
+{"t": 26.62, "speaker": "PATIENT", "text": "I\u2019m not sure who Dana is, but I\u2019m calling about cancelling my physical therapy appointment tomorrow."}
+{"t": 34.15, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6970}
+{"t": 34.15, "speaker": "AGENT", "text": "No problem. Please tell me your full name and date of birth."}
+{"t": 39.34, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 670}
+{"t": 39.34, "speaker": "PATIENT", "text": "Sure, my name is Priya Raghunathan, and my date of birth is November 21, 1996."}
+{"t": 49.99, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 9960}
+{"t": 49.99, "speaker": "AGENT", "text": "Just to confirm, I have your name as Priya Raikoudathan and your date of birth as November 21st, 1996. Is that correct? If so, please spell your first and last name for me."}
+{"t": 61.39, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 400}
+{"t": 61.39, "speaker": "PATIENT", "text": "Yes, that\u2019s correct. P-R-I-Y-A space R-A-G-H-U-N-A-T-H-A-N."}
+{"t": 73.77, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 11590}
+{"t": 73.77, "speaker": "AGENT", "text": "Would you like me to look up your record using the phone number you have on file with us? If so, please tell me that number. If you're not sure, I can confirm your name and day of birth again. Which would you prefer?"}
+{"t": 85.71, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 610}
+{"t": 85.71, "speaker": "PATIENT", "text": "Yeah, you can look it up with the phone number on file. It\u2019s 609-555-0165."}
+{"t": 97.21, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 10780}
+{"t": 97.21, "speaker": "AGENT", "text": "I have your phone number as 609-555-0165 and your date of birth is November 21st, 1996. Is that correct?"}
+{"t": 108.84, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 500}
+{"t": 108.84, "speaker": "PATIENT", "text": "Yeah, that\u2019s correct. My name is Priya Raghunathan, and my DOB is November 21, 1996."}
+{"t": 117.63, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 7950}
+{"t": 117.63, "speaker": "AGENT", "text": "I'm unable to find your record in our system right now. I'll connect you to our patient support team so they can help cancel your appointment. Please stay on the line. Transferring you now. Thank you."}
+{"t": 134.16, "speaker": "EVENT", "text": "bot chose to hang up: Call ended; the line reached a test message and no patient support agent was available."}

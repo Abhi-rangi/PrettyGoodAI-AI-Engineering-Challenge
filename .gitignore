@@ -3,7 +3,10 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-calls/*
-!calls/.gitkeep
 .DS_Store
 _to_delete/
+bug-candidates.md
+
+# Recordings and transcripts ARE the deliverable and are committed on purpose.
+# Only the intermediate WAV is ignored; the MP3 next to it is the artifact.
+calls/**/*.wav

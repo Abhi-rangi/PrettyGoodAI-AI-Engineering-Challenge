@@ -287,7 +287,7 @@ class CallBridge:
         started = queue.popleft() if queue else None
         self.transcript.add(speaker, text, t=started)
 
-    async def _drain_transcripts(self, openai_ws, seconds: float = 3.0) -> None:
+    async def _drain_transcripts(self, openai_ws, seconds: float = 4.0) -> None:
         """Collect transcripts that were still in flight when the call ended.
 
         Whisper finishes well after the audio it describes, so the last few turns of a
@@ -296,6 +296,15 @@ class CallBridge:
         in the recording and no matching lines in the transcript. Both sides of every
         call are a hard requirement, so we wait briefly for the stragglers.
         """
+        # If the agent was still mid-sentence when the call ended, server VAD never
+        # saw a silence, so it never closed the input buffer and no transcription was
+        # ever produced. Ask for one explicitly. Rejected in some VAD modes, which is
+        # harmless - `analyze.py repair` backfills from the recording either way.
+        try:
+            await openai_ws.send(json.dumps({"type": "input_audio_buffer.commit"}))
+        except Exception:
+            pass
+
         loop = asyncio.get_event_loop()
         deadline = loop.time() + seconds
         recovered = 0

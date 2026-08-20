@@ -1,0 +1,35 @@
+{"t": 1.25, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el dos. Thanks for calling Pivot Point Orthopedics. Part of Pretty Good AI? How may I help you today?"}
+{"t": 14.2, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 780}
+{"t": 14.2, "speaker": "PATIENT", "text": "Hi, I\u2019m calling to book a first appointment as a new patient for a routine annual physical."}
+{"t": 21.8, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 7160}
+{"t": 21.8, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 27.35, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 590}
+{"t": 27.35, "speaker": "PATIENT", "text": "Yeah, this is Dana."}
+{"t": 31.21, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 3740}
+{"t": 31.21, "speaker": "AGENT", "text": "Please provide your date of birth."}
+{"t": 35.0, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1330}
+{"t": 35.0, "speaker": "PATIENT", "text": "My date of birth is March 12, 1992."}
+{"t": 42.33, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 7020}
+{"t": 42.33, "speaker": "AGENT", "text": "Just to confirm, you'd like to schedule a new patient consultation for your annual physical. Is that correct?"}
+{"t": 49.49, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 470}
+{"t": 49.49, "speaker": "PATIENT", "text": "Yes, that\u2019s correct. I\u2019d like to book a new patient appointment for a routine annual physical."}
+{"t": 56.53, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6560}
+{"t": 56.53, "speaker": "AGENT", "text": "Do you have a specific provider you'd like to see, or are you open to the first available?"}
+{"t": 62.29, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 370}
+{"t": 62.29, "speaker": "PATIENT", "text": "I\u2019m open to the first available."}
+{"t": 66.33, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 3780}
+{"t": 66.33, "speaker": "AGENT", "text": "Money checks are the soonest available appointments for a new patient annual physical."}
+{"t": 71.71, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 490}
+{"t": 71.71, "speaker": "PATIENT", "text": "Okay, thanks."}
+{"t": 72.52, "speaker": "PATIENT", "text": "Okay."}
+{"t": 75.61, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 3070}
+{"t": 75.61, "speaker": "AGENT", "text": "We have openings this week and early next week. Do you have a preferred day or time of day for your appointment? We have openings this Thursday. Would you like a morning or afternoon appointment?"}
+{"t": 88.0, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 440}
+{"t": 88.0, "speaker": "PATIENT", "text": "Sure, I\u2019d prefer a morning appointment, before 10 if possible. What time is available this Thursday?"}
+{"t": 96.18, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 7550}
+{"t": 96.18, "speaker": "AGENT", "text": "There is a morning slot available this Thursday at 9.45 a.m. with Abraker. Would you like to book that time?"}
+{"t": 104.55, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 430}
+{"t": 104.55, "speaker": "PATIENT", "text": "Okay, let me take a moment to confirm that time works."}
+{"t": 105.41, "speaker": "PATIENT", "text": "Yes, I\u2019ll take that 9:45 AM slot this Thursday with A. Broker."}
+{"t": 115.43, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 10020}
+{"t": 135.64, "speaker": "EVENT", "text": "bot chose to hang up: Called to book and confirm the appointment and opted for a text confirmation."}

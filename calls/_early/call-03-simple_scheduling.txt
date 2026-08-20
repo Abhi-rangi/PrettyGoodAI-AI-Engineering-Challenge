@@ -1,0 +1,34 @@
+Call:        call-03-simple_scheduling
+Scenario:    01 — New patient books an annual physical
+Dialed:      +18054398008
+Audio:       call-03-simple_scheduling.mp3
+Duration:    2:15
+
+Goal:
+  Book a first appointment as a new patient for a routine annual physical. Get a specific date and time confirmed out loud before you hang up. If they offer a slot that works, take it.
+
+What to watch for:
+  - Does it collect the information a real intake needs (name, DOB, callback, insurance)?
+  - Does it read back the confirmed slot, or just assert it booked something?
+
+------------------------------------------------------------------------
+
+[0:01] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el dos. Thanks for calling Pivot Point Orthopedics. Part of Pretty Good AI? How may I help you today?
+[0:14] PATIENT: Hi, I’m calling to book a first appointment as a new patient for a routine annual physical.
+[0:21] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:27] PATIENT: Yeah, this is Dana.
+[0:31] AGENT: Please provide your date of birth.
+[0:35] PATIENT: My date of birth is March 12, 1992.
+[0:42] AGENT: Just to confirm, you'd like to schedule a new patient consultation for your annual physical. Is that correct?
+[0:49] PATIENT: Yes, that’s correct. I’d like to book a new patient appointment for a routine annual physical.
+[0:56] AGENT: Do you have a specific provider you'd like to see, or are you open to the first available?
+[1:02] PATIENT: I’m open to the first available.
+[1:06] AGENT: Money checks are the soonest available appointments for a new patient annual physical.
+[1:11] PATIENT: Okay, thanks.
+[1:12] PATIENT: Okay.
+[1:15] AGENT: We have openings this week and early next week. Do you have a preferred day or time of day for your appointment? We have openings this Thursday. Would you like a morning or afternoon appointment?
+[1:28] PATIENT: Sure, I’d prefer a morning appointment, before 10 if possible. What time is available this Thursday?
+[1:36] AGENT: There is a morning slot available this Thursday at 9.45 a.m. with Abraker. Would you like to book that time?
+[1:44] PATIENT: Okay, let me take a moment to confirm that time works.
+[1:45] PATIENT: Yes, I’ll take that 9:45 AM slot this Thursday with A. Broker.
+[2:15] -- bot chose to hang up: Called to book and confirm the appointment and opted for a text confirmation. --

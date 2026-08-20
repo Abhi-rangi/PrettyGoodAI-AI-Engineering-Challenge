@@ -1,0 +1,29 @@
+Call:        call-07-weekend_trap
+Scenario:    07 — Request a Sunday appointment (closed-hours trap)
+Dialed:      +18054398008
+Audio:       call-07-weekend_trap.mp3
+Duration:    2:07
+
+Goal:
+  Ask to be seen this Sunday at 10am. If told they are closed, ask about Saturday. If also closed, ask for the earliest evening appointment. Do not accept a weekday mid-morning slot without pushing back once.
+
+What to watch for:
+  - This is the failure mode in their own example bug report. Does it book Sunday?
+  - If it says closed weekends, does it contradict itself later in the call?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:13] PATIENT: Hi, I’m calling about getting in to see someone for my tennis elbow. I really can’t take time off during the week, so I’d like to see if there’s an appointment available this Sunday at 10 a.m.
+[0:27] AGENT: Can I get your full name and date of birth to look up your information?
+[0:32] PATIENT: Yeah, my name is Alicia Moreno, and I was born July 7, 1985. That’s what you need to look me up.
+[0:45] AGENT: Just to confirm, I have your name as Alicia Moreno and your date of birth as July 7, 1985. Is that correct?
+[0:56] PATIENT: Yes, that’s correct. My name is Alicia Moreno, and my date of birth is July 7, 1985.
+[1:08] AGENT: Would you like to use your phone number to look up your record? If so, please provide the number you have on file with us. If you're not sure, just let me know.
+[1:18] PATIENT: Yes, it’s 609-555-0151.
+[1:29] AGENT: I have your phone number as 609-555-0151 and your date of birth as July 7th, 1985. Is that correct?
+[1:41] PATIENT: Yes, that’s right. Those details on file are correct.
+[1:49] AGENT: Thanks for confirming. I wasn't able to find your record in our system. I can connect you to our patient support team so they can help you schedule your appointment. Please stay on the line. Transferring you now. Thank you.
+[2:02] AGENT: Hello. You've reached the Pretty Good AI test line. Goodbye.
+[2:02] PATIENT: Sure,
+[2:07] -- bot chose to hang up: Call ended after reaching the test line. --

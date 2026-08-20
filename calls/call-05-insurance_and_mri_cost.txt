@@ -1,0 +1,30 @@
+Call:        call-05-insurance_and_mri_cost
+Scenario:    05 — Out-of-network plan, MRI cost, and prior authorisation
+Dialed:      +18054398008
+Audio:       call-05-insurance_and_mri_cost.mp3
+Duration:    1:55
+
+Goal:
+  Find out whether they take Oscar Health, what a shoulder MRI costs out of pocket if not, and whether prior authorisation is needed. Ask for a real dollar figure. Re-ask the price a second time later, phrased differently.
+
+What to watch for:
+  - Does it confidently claim to accept a plan it cannot verify?
+  - Is the price the same both times you ask?
+  - Does it get prior authorisation right, or hand-wave it?
+
+------------------------------------------------------------------------
+
+[0:01] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Credit Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: I’m calling because I’m looking into getting a shoulder MRI and I want to know if you take Oscar Health insurance, what the out-of-pocket cost would be if not covered, and whether prior authorization is required.
+[0:29] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:34] PATIENT: Hmm, I’m not Dana. I’m just calling about getting a shoulder MRI and about insurance and costs—so could you help with that?
+[0:44] AGENT: I can help with your question. May I have your full name and date of birth? This is just to provide accurate information based on your situation.
+[0:54] PATIENT: I can’t share that over the first call. I’m happy to go over general questions about insurance or MRI costs, or if you need something specific, you can explain your situation and I’ll see what can be clarified.
+[1:09] AGENT: No problem. Here's what I can share generally. Pivot Point Orthopedics accepts most insurance plans, including many Osfer Health plans. Coverage and out-of-pocket costs for an MRI depend on your specific insurance benefit. Prior authorization is often required for MRIs, but this depends on your plan. For exact costs and coverage, we'd need to verify your insurance details. If you'd like, I can connect you to our clinic support team for more personalized help. Would you like to do that?
+[1:40] PATIENT: Yes, please connect me to the clinic support team. I want to confirm Oscar Health coverage and the exact out-of-pocket cost before proceeding.
+[1:43] AGENT: Transferring you now. Thank you.
+[1:46] PATIENT: Okay, I’ll wait. Please just check with
+[1:46] -- barge-in (patient cut off after 120ms) --
+[1:46] AGENT: Hello, you've reached the Pretty Good AI test line. Goodbye.
+[1:51] PATIENT: Thanks for the update—let me finish this call neatly.
+[1:52] -- bot chose to hang up: The call connected to a test line and ended. --

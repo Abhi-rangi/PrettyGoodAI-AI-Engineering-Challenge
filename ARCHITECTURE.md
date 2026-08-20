@@ -36,7 +36,7 @@ together — `conversation.item.truncate` so the model does not believe it said 
 caller never heard, a Twilio `clear` to flush the playout buffer, and a matching trim on
 the local recording — and getting that wrong in any one place is audible. The other
 deliberate choices were smaller: server VAD with `silence_duration_ms` raised from the
-500ms default to 700ms, because at the default the bot clipped the agent every time it
+500ms default to 900ms, because at the default the bot clipped the agent every time it
 paused mid-sentence and at 1000ms the call dragged; an `end_call` function tool so the
 model hangs up when its goal is met rather than every call running to a timeout; and
 recording in-process instead of paying for Twilio's recording, which is free and gives
@@ -80,11 +80,21 @@ endpoint, and `run_call.py` is the only thing that cares when the call ends.
 **Whisper for input transcription rather than the newer streaming transcribers.** The
 transcript is an artifact for humans to read afterward, not something the bot reasons
 over — the model hears the raw audio directly. Accuracy at the margin was not worth
-another variable while tuning.
+another variable while tuning. What did matter was *completeness*: transcription lands
+well after the audio it describes, so closing the session at hangup silently dropped the
+last few turns — one call had thirty seconds of agent speech in the recording and no
+matching transcript lines. Teardown now commits any uncommitted input audio and drains
+in-flight transcription events, and `analyze.py repair` can rebuild either side from the
+recording as a backstop.
 
-**No retry logic on a dropped websocket.** A dropped call is a discarded call; twelve
-scenarios run in twenty minutes and re-running one is cheaper than the reconnect and
-state-resync code would be.
+**Retry the control plane, not the media plane.** A dropped media websocket is a
+discarded call — reconnecting mid-conversation and resyncing state costs more than
+re-running the scenario. But the REST calls that place a call and poll its status are a
+different matter, and I learned that the hard way: a single TCP reset while polling
+Twilio ended a twelve-call run at call four. The call itself was fine and had already
+been recorded, so an unrecoverable crash was the wrong response to a reporting hiccup.
+Status polls now tolerate five consecutive failures with backoff, and a failed scenario
+is logged and skipped rather than taking the remaining scenarios down with it.
 
 **Measuring latency rather than eyeballing it.** The first version of the analysis tool
 inferred silence by diffing consecutive transcript timestamps, which is wrong — the gap

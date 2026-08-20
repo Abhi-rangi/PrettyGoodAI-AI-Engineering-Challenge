@@ -163,9 +163,10 @@ def cmd_repair(args) -> None:
         segments: list[dict] = []
         for channel, speaker in ((0, "AGENT"), (1, "PATIENT")):
             wav = Path(f"/tmp/{call.name}-{speaker}.wav")
+            # -map_channel was removed in ffmpeg 7; the pan filter is the replacement.
             subprocess.run(
                 ["ffmpeg", "-y", "-loglevel", "error", "-i", str(call.audio),
-                 "-map_channel", f"0.0.{channel}", str(wav)],
+                 "-af", f"pan=mono|c0=c{channel}", "-ar", "16000", str(wav)],
                 check=True,
             )
             with wav.open("rb") as fh:
@@ -182,9 +183,11 @@ def cmd_repair(args) -> None:
                     segments.append({"t": round(float(start), 2), "speaker": speaker, "text": text})
             wav.unlink(missing_ok=True)
 
-        # Keep the original EVENT markers; they carry barge-in and hangup context.
-        events = [l for l in call.lines if l["speaker"] == "EVENT"]
-        merged = sorted(segments + events, key=lambda l: l["t"])
+        # Keep EVENT markers (barge-in, hangup reason) and METRIC rows (reply latency).
+        # An earlier version kept only EVENTs, which silently threw away the latency
+        # measurements the moment a transcript was repaired.
+        keep = [l for l in call.lines if l["speaker"] in ("EVENT", "METRIC")]
+        merged = sorted(segments + keep, key=lambda l: l["t"])
 
         call.stem.with_suffix(".jsonl").write_text(
             "\n".join(json.dumps(l) for l in merged) + "\n")

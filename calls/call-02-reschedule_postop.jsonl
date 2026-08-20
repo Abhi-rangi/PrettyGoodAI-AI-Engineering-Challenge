@@ -1,0 +1,29 @@
+{"t": 1.17, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el dos. Thanks for calling Pivot Point Orthopedics. Part of Pretty Good AI. How may I help you today?"}
+{"t": 14.36, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1050}
+{"t": 14.36, "speaker": "PATIENT", "text": "Hey, I\u2019m calling to see if my follow-up appointment, which is currently on Thursday, can be moved to Friday afternoon."}
+{"t": 23.2, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 8200}
+{"t": 23.2, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 28.38, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 580}
+{"t": 28.38, "speaker": "PATIENT", "text": "I\u2019m not sure\u2014I\u2019m just a caller. But I did want to check on that Thursday to Friday change."}
+{"t": 35.67, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6860}
+{"t": 35.67, "speaker": "AGENT", "text": "To look up the appointment, I'll need your full name and date of birth. Could you please provide both?"}
+{"t": 42.67, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 750}
+{"t": 42.67, "speaker": "PATIENT", "text": "Marcus Bell is my full name, and my date of birth is August 3, 1979."}
+{"t": 51.39, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 8250}
+{"t": 51.39, "speaker": "AGENT", "text": "Just to confirm, I have your name as Marcus Bell and your date of birth as August 3, 1979. Is that correct?"}
+{"t": 60.66, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 630}
+{"t": 60.66, "speaker": "PATIENT", "text": "Let me double-check that with you and then we\u2019ll see about the timing."}
+{"t": 62.34, "speaker": "PATIENT", "text": "Yes, that\u2019s right. Marcus Bell, and August 3, 1979.\n\nNow, about moving that follow-up\u2014I'm hoping for Friday afternoon, but if that\u2019s not possible, Monday morning would be good too."}
+{"t": 78.74, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 16400}
+{"t": 78.74, "speaker": "AGENT", "text": "I have your name as Marcus Bell, date of birth, August 3, 1979, and your phone number is 856-880-6585. Is all of that correct?"}
+{"t": 93.45, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1670}
+{"t": 93.45, "speaker": "PATIENT", "text": "Yeah, that\u2019s correct. Thank you."}
+{"t": 100.99, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 7380}
+{"t": 100.99, "speaker": "AGENT", "text": "I'm unable to find your record in our system, so I can't make changes to your appointment right now. I can connect you to our patient support team for help. Would you like me to do that?"}
+{"t": 111.89, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 660}
+{"t": 111.89, "speaker": "PATIENT", "text": "Yeah, that makes sense\u2014if you need to connect me to support, please go ahead."}
+{"t": 115.37, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 3120}
+{"t": 115.37, "speaker": "AGENT", "text": "Kids for you now. Thank you"}
+{"t": 118.21, "speaker": "AGENT", "text": "Hello, you've reached the pretty good AI test line. Goodbye."}
+{"t": 118.24, "speaker": "PATIENT", "text": "Okay, thank"}
+{"t": 123.1, "speaker": "EVENT", "text": "bot chose to hang up: Call completed after being connected to support; no further information was exchanged."}

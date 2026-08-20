@@ -1,0 +1,37 @@
+Call:        call-09-mid_sentence_correction
+Scenario:    09 — Self-corrections, interruptions, and barge-in
+Dialed:      +18054398008
+Audio:       call-09-mid_sentence_correction.mp3
+Duration:    1:59
+
+Goal:
+  Book an appointment, correcting yourself repeatedly. "Thursday at three — actually no, make it Friday at two, sorry." Give 609-555-0127 as your number then correct the last digit to 6. Interrupt the agent mid-sentence at least twice. End having confirmed Friday 2pm and the corrected number.
+
+What to watch for:
+  - Does the last correction win, or does it keep what it heard first?
+  - Does interrupting it make it lose earlier context?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes.
+[0:04] AGENT: Para Español, oprima el 2.
+[0:07] AGENT: Thanks for calling Pivot Point Orthopedics.
+[0:09] AGENT: Part of pretty good AI. How may I help you today?
+[0:14] PATIENT: Hi, I’m calling to schedule a follow-up about my shoulder—actually, wait, it’s for a shoulder impingement, sorry.
+[0:23] AGENT: No problem. May I have your full name and date of birth?
+[0:28] PATIENT: My name is Nina Castellanos.
+[0:32] AGENT: Thanks Nina. Can you please provide your date of birth?
+[0:36] PATIENT: Sure, it’s May 18, 1993.
+[0:42] AGENT: Just to confirm, I have your name as Mina Castellanos and your date of birth as May 18, 1993. Is that correct? If so, could you please spell your first and last name for me?
+[0:54] PATIENT: Yeah, that’s right. My name is Nina Castellanos. That’s N-I-N-A, and Castellanos is C-A-S-T-E-L-L-A-N-O-S.
+[1:09] AGENT: Would you like to use your phone number to look up your record? If so, please provide the number you have on file with us.
+[1:15] AGENT: If you're not sure, just let me know and we can confirm your name and date of birth again.
+[1:21] PATIENT: Yeah, I have 609-555-0127 on file. Oh—actually, hold on, it should end in 6.
+[1:32] AGENT: I'd have your phone number at 609-555-0126.
+[1:37] AGENT: Is that correct?
+[1:39] PATIENT: Okay, let me confirm that number and then we can sort out the appointment details.
+[1:40] PATIENT: Yes, that’s right. And the number should end with 6, not 7, if that’s what you have.
+[1:52] AGENT: Transferring you now. Thank you.
+[1:55] AGENT: Hello.
+[1:55] PATIENT: Okay, I
+[1:59] -- bot chose to hang up: Call clearly ended; agent line disconnected. --

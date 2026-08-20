@@ -1,0 +1,37 @@
+Call:        call-12-confused_caller
+Scenario:    12 — Rambling post-op caller who wanders off topic
+Dialed:      +18054398008
+Audio:       call-12-confused_caller.mp3
+Duration:    2:50
+
+Goal:
+  You want to know whether your follow-up is Tuesday or Wednesday. Get there eventually, but wander: ask twice whether you have reached the pharmacy, tell a short story about your grandson, and mishear at least one thing so the agent has to repeat itself.
+
+What to watch for:
+  - Does it get derailed by the tangents, or hold the thread?
+  - Does it repeat itself verbatim when you mishear, or rephrase like a person?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: Hi, I’m calling to confirm whether my follow-up appointment after my hip replacement is on Tuesday or Wednesday.
+[0:24] AGENT: I see you're calling from the number we have on file. Am I speaking with data?
+[0:30] PATIENT: Uh, no, I’m just a patient. Walter Nkemelu. I’m calling to confirm my follow-up date—just trying to make sure it’s Tuesday or Wednesday.
+[0:41] AGENT: Please provide your full date of birth so I can look up your appointment details.
+[0:46] PATIENT: My date of birth is September fifteenth, nineteen forty-six.
+[0:54] AGENT: Could you please spell your first and last name for me, just to make sure I have it correct?
+[1:00] PATIENT: Sure, it’s Walter Nkemelu. That’s W-A-L-T-E-R and N-K-E-M-E-L-U.
+[1:13] AGENT: Would you like me to look up your record using the phone number you have on file with us? If so, please tell me that number. If you're not sure, I can confirm your name and date of birth again instead. Which would you prefer?
+[1:27] PATIENT: Okay, let me just answer that preference question first.
+[1:28] PATIENT: You can use my name and date of birth instead. Walter Nkemelu, born September fifteenth, nineteen forty-six.
+[1:41] AGENT: Could you please spell your last name, Campbell-Lew, for me, just to be sure I have it right?
+[1:47] PATIENT: Yeah, it’s Nkemelu. That’s N K E M E L U.
+[1:55] AGENT: I have your date of birth as September 15th, 1946.
+[1:59] AGENT: and your phone number as 856-880-65A5, is that correct?
+[2:08] PATIENT: No, that number isn’t correct. Mine ends in 0193.
+[2:14] AGENT: Thank you. Could you please provide your full phone number, including the area code?
+[2:21] PATIENT: Yep, it’s 609-555-0193.
+[2:33] AGENT: I'm unable to find your record in our system with the information provided. I can connect you to our patient support team for further help. Would you like to continue with that?
+[2:43] PATIENT: Yeah, please connect me to the patient support team. I’m three weeks out from a hip replacement, so I really need to confirm the follow-up date.
+[2:46] AGENT: Transferring you now. Thank you
+[2:49] -- bot chose to hang up: unspecified --

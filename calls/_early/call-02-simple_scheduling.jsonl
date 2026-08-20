@@ -1,0 +1,20 @@
+{"t": 0.86, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?"}
+{"t": 13.96, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 700}
+{"t": 13.96, "speaker": "PATIENT", "text": "Hi, I\u2019m new to the area and calling to set up a first appointment for a routine annual physical. I\u2019m flexible, but mornings before 10 work best for me."}
+{"t": 25.77, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 10940}
+{"t": 25.77, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 30.98, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 430}
+{"t": 30.98, "speaker": "PATIENT", "text": "Yes, I\u2019m Dana, calling from that number on file."}
+{"t": 36.66, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 5350}
+{"t": 36.66, "speaker": "AGENT", "text": "Please provide your date of birth."}
+{"t": 39.22, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 410}
+{"t": 39.22, "speaker": "PATIENT", "text": "March 12, 1992."}
+{"t": 45.45, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6020}
+{"t": 45.45, "speaker": "AGENT", "text": "Just to confirm, you'd like to schedule a new patient consultation for your annual physical. Is that correct?"}
+{"t": 52.26, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 360}
+{"t": 52.26, "speaker": "PATIENT", "text": "Yeah, that\u2019s right. A new patient consultation for my annual physical."}
+{"t": 58.43, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 5780}
+{"t": 58.43, "speaker": "AGENT", "text": "Do you have a specific provider you'd like to see, or are you open to the first available?"}
+{"t": 64.9, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 400}
+{"t": 64.9, "speaker": "PATIENT", "text": "I\u2019m okay seeing whoever\u2019s available first. Just as long as it\u2019s a routine physical."}
+{"t": 71.75, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6410}

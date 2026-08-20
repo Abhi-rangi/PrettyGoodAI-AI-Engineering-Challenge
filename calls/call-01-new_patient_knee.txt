@@ -1,0 +1,34 @@
+Call:        call-01-new_patient_knee
+Scenario:    01 — New patient with knee pain books a first visit
+Dialed:      +18054398008
+Audio:       call-01-new_patient_knee.mp3
+Duration:    2:08
+
+Goal:
+  Book a first appointment as a new patient for the knee pain. Get a specific date and time confirmed out loud before you hang up.
+
+What to watch for:
+  - Does intake collect what a real practice needs (name, DOB, callback, insurance)?
+  - Does it read back the confirmed slot, or just assert it booked something?
+  - Does it ask anything about the injury, or book blind?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orphopedics. Part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: Hi, I’m calling to book a first appointment as a new patient for some knee pain. I started running again, and it’s been sore on the outside for a few weeks, worse going downstairs.
+[0:28] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:33] PATIENT: Yes, that’s me.
+[0:36] AGENT: please provide your date of birth.
+[0:39] PATIENT: March 12, 1992.
+[0:45] AGENT: Just to confirm, you'd like to book a new patient consultation for your knee pain. Is that correct?
+[0:52] PATIENT: Sure, yes.
+[0:52] PATIENT: Yeah, that’s right. I’d like to set up a new patient appointment for the knee pain.
+[0:59] AGENT: Do you have a specific provider you'd like to see, or are you open to the first available?
+[1:05] PATIENT: I’m open to the first available. I’m new in the area, so whoever’s available is fine.
+[1:12] AGENT: We have openings this week and early next week. Do you have a preferred day or time of day for your appointment?
+[1:20] PATIENT: Yeah, mornings before 10 work best for me, if there’s an early opening next week.
+[1:32] AGENT: You already have a new patient appointment booked for Thursday, August 20th at 945 a.m. Would you like to keep this appointment, reschedule it, or cancel it?
+[1:43] PATIENT: Yeah, that works for me. Keep it as scheduled.
+[1:48] AGENT: Your appointment is set for Thursday, August 20th at 9.45 a.m. Is there anything else I can help you with today?
+[1:56] PATIENT: That’s it, thanks so much. I’ll be there.
+[2:08] -- bot chose to hang up: Appointment confirmed; ended call. --

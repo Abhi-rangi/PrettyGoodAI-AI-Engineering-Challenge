@@ -9,6 +9,7 @@ The TwiML is passed inline to Twilio's REST API, so this repo does not need a pu
 HTTP endpoint — only the websocket that <Connect><Stream> dials into.
 """
 import argparse
+import re
 import sys
 import time
 from urllib.parse import quote
@@ -20,9 +21,17 @@ from patient import config, persona
 
 
 def next_index(prefix: str) -> int:
-    """Self-test calls get their own numbering so they can never be mistaken for,
-    or renumber, the real submission set."""
-    return len(list(config.CALL_DIR.glob(f"{prefix}-*.txt"))) + 1
+    """Highest existing number plus one.
+
+    Self-test calls are numbered separately so they can never be mistaken for the real
+    submission set. This counted files rather than reading their numbers, so deleting a
+    bad call made the next one reuse a number that was already taken - two different
+    scenarios ended up as call-14.
+    """
+    used = [int(m.group(1))
+            for f in config.CALL_DIR.glob(f"{prefix}-*.txt")
+            if (m := re.match(rf"{prefix}-(\d+)-", f.name))]
+    return max(used, default=0) + 1
 
 
 def twiml_for(scenario: persona.Scenario, label: str, to: str) -> str:
@@ -60,15 +69,27 @@ def place(client: Client, scenario: persona.Scenario, index: int, to: str) -> No
     )
 
     # Poll rather than webhook: one less public endpoint, and this script is the only
-    # thing waiting on the result anyway.
+    # thing waiting on the result anyway. Transient TCP resets against the Twilio API
+    # are tolerated - the call itself is already in flight and is being recorded by the
+    # media-stream server, so a failed status poll is a reporting problem, not a lost
+    # call. Without this, one reset ended a twelve-call run at call four.
     deadline = time.time() + scenario.max_duration_s + 60
-    status = call.status
+    status, consecutive_errors = call.status, 0
     while status not in {"completed", "failed", "busy", "no-answer", "canceled"}:
         if time.time() > deadline:
             print("  ! timed out waiting for the call to end")
             break
         time.sleep(3)
-        status = client.calls(call.sid).fetch().status
+        try:
+            status = client.calls(call.sid).fetch().status
+            consecutive_errors = 0
+        except Exception as exc:
+            consecutive_errors += 1
+            if consecutive_errors >= 5:
+                print(f"  ! lost contact with the Twilio API ({exc}); "
+                      f"moving on, check calls/ for the recording")
+                break
+            time.sleep(3 * consecutive_errors)
 
     print(f"  call {status}")
     if status in {"failed", "busy", "no-answer"}:
@@ -79,6 +100,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenario", help="scenario id or name, e.g. 01 or medication_refill")
     ap.add_argument("--all", action="store_true", help="run every scenario in order")
+    ap.add_argument("--skip", default="", metavar="IDS",
+                    help="with --all, skip these scenario ids, e.g. --skip 01,07")
     ap.add_argument("--list", action="store_true", help="list scenarios and exit")
     ap.add_argument("--gap", type=int, default=20, help="seconds to wait between calls in --all")
     ap.add_argument("--to", metavar="E164",
@@ -103,7 +126,10 @@ def main() -> None:
     index = next_index("call" if to == config.TARGET_NUMBER else "selftest")
 
     if args.all:
-        scenarios = persona.load_all()
+        skip = {x.strip() for x in args.skip.split(",") if x.strip()}
+        scenarios = [s for s in persona.load_all() if s.id not in skip]
+        if skip:
+            print(f"skipping scenario(s): {', '.join(sorted(skip))}")
     elif args.scenario:
         scenarios = [persona.load(args.scenario)]
     else:
@@ -113,11 +139,22 @@ def main() -> None:
     print(f"Server must already be running and reachable at wss://{config.PUBLIC_HOST}")
     if to != config.TARGET_NUMBER:
         print(f"SELF-TEST MODE — dialing {to}, not the assessment line.")
+    failed = []
     for i, scenario in enumerate(scenarios):
-        place(client, scenario, index + i, to)
+        # One bad call must not end the run. Re-running a single scenario afterwards is
+        # cheap; losing the eight calls queued behind it is not.
+        try:
+            place(client, scenario, index + i, to)
+        except Exception as exc:
+            failed.append(scenario.id)
+            print(f"  ! scenario {scenario.id} failed: {type(exc).__name__}: {exc}")
         if i < len(scenarios) - 1:
             print(f"  waiting {args.gap}s before the next call…")
             time.sleep(args.gap)
+
+    if failed:
+        print(f"\nFailed scenarios: {', '.join(failed)}")
+        print(f"Re-run with: python run_call.py --scenario {failed[0]}")
 
 
 if __name__ == "__main__":

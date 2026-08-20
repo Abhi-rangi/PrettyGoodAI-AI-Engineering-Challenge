@@ -1,0 +1,26 @@
+Call:        call-06-hours_locations_xray
+Scenario:    06 — Hours, second location, on-site X-ray, and parking
+Dialed:      +18054398008
+Audio:       call-06-hours_locations_xray.mp3
+Duration:    2:02
+
+Goal:
+  Find out the opening hours, whether there is more than one location, whether X-rays are done on site or you get sent elsewhere, and what parking is like. Get concrete answers rather than "check our website". Ask the hours a second time near the end, phrased differently.
+
+What to watch for:
+  - Are the hours the same both times you ask?
+  - Does it deflect to a website instead of answering?
+  - Does it know whether imaging is on site?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: Hi, I’m calling to ask about your opening hours and a few logistics. Do you have more than one location, and are X-rays done on-site?
+[0:25] AGENT: Pivot Point Orthopedics has one location, 1234 Recovery Way, Suite 200, Austin. We offer orthopedic care and physical therapy at this site. For x-rays, we do not perform them on site. If you need imaging, we'll help coordinate it with a nearby facility. Is there anything else you'd like to know about our clinic or services?
+[0:48] PATIENT: Okay, thanks for that. Let me ask a quick question about timing and parking.
+[0:52] PATIENT: Yeah, that’s clear. Thanks. I wondered, what are your opening hours, and is parking pretty straightforward there? I’ve got a bit of trouble getting around after walking far, so I want to know if it’s easy to get in.
+[1:09] AGENT: Our clinic is open Monday, Tuesday, and Thursday from 9 a.m. to 4 p.m., Wednesday from 12 p.m. to 7 p.m., and Friday from 9 a.m. to 12 p.m. Parking is free and right in front of the building. The entrance is close to the lot, and there's an elevator to reach Suite 200. It's designed to be easy for patients with mobility concerns. Let me know if you have any other questions or need help with an appointment.
+[1:38] PATIENT: That sounds great, thanks. I’ve got the parking sorted and the elevator noted, which helps a lot. Just to double-check, what time are you open on Saturdays, if at all?
+[1:50] AGENT: We're closed on Saturdays. The clinic is open Monday through Friday only. If you need to schedule or have other questions, I'm here to help.
+[2:00] PATIENT: Okay, thanks a lot for the help. I’m all set.
+[2:00] -- bot chose to hang up: Called to confirm hours and parking; ended the call after hearing they’re closed Saturdays and that the clinic runs Monday through Friday. --

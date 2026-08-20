@@ -1,0 +1,25 @@
+Call:        call-02-simple_scheduling
+Scenario:    01 — New patient books an annual physical
+Dialed:      +18054398008
+Audio:       call-02-simple_scheduling.mp3
+Duration:    1:16
+
+Goal:
+  Book a first appointment as a new patient for a routine annual physical. Get a specific date and time confirmed out loud before you hang up. If they offer a slot that works, take it.
+
+What to watch for:
+  - Does it collect the information a real intake needs (name, DOB, callback, insurance)?
+  - Does it read back the confirmed slot, or just assert it booked something?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:13] PATIENT: Hi, I’m new to the area and calling to set up a first appointment for a routine annual physical. I’m flexible, but mornings before 10 work best for me.
+[0:25] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:30] PATIENT: Yes, I’m Dana, calling from that number on file.
+[0:36] AGENT: Please provide your date of birth.
+[0:39] PATIENT: March 12, 1992.
+[0:45] AGENT: Just to confirm, you'd like to schedule a new patient consultation for your annual physical. Is that correct?
+[0:52] PATIENT: Yeah, that’s right. A new patient consultation for my annual physical.
+[0:58] AGENT: Do you have a specific provider you'd like to see, or are you open to the first available?
+[1:04] PATIENT: I’m okay seeing whoever’s available first. Just as long as it’s a routine physical.

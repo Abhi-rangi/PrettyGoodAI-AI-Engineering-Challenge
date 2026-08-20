@@ -1,0 +1,34 @@
+{"t": 0.78, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el 2. Thanks for calling Pivot Point Orphopedics. Part of Pretty Good AI. How may I help you today?"}
+{"t": 14.86, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1140}
+{"t": 14.86, "speaker": "PATIENT", "text": "Hi, I\u2019m calling to book a first appointment as a new patient for some knee pain. I started running again, and it\u2019s been sore on the outside for a few weeks, worse going downstairs."}
+{"t": 28.2, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 12300}
+{"t": 28.2, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 33.5, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 580}
+{"t": 33.5, "speaker": "PATIENT", "text": "Yes, that\u2019s me."}
+{"t": 36.94, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 3280}
+{"t": 36.94, "speaker": "AGENT", "text": "please provide your date of birth."}
+{"t": 39.77, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 740}
+{"t": 39.77, "speaker": "PATIENT", "text": "March 12, 1992."}
+{"t": 45.51, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 5530}
+{"t": 45.51, "speaker": "AGENT", "text": "Just to confirm, you'd like to book a new patient consultation for your knee pain. Is that correct?"}
+{"t": 52.29, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 540}
+{"t": 52.29, "speaker": "PATIENT", "text": "Sure, yes."}
+{"t": 52.82, "speaker": "PATIENT", "text": "Yeah, that\u2019s right. I\u2019d like to set up a new patient appointment for the knee pain."}
+{"t": 59.58, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6760}
+{"t": 59.58, "speaker": "AGENT", "text": "Do you have a specific provider you'd like to see, or are you open to the first available?"}
+{"t": 65.75, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 600}
+{"t": 65.75, "speaker": "PATIENT", "text": "I\u2019m open to the first available. I\u2019m new in the area, so whoever\u2019s available is fine."}
+{"t": 72.66, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 6450}
+{"t": 72.66, "speaker": "AGENT", "text": "We have openings this week and early next week. Do you have a preferred day or time of day for your appointment?"}
+{"t": 80.32, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 790}
+{"t": 80.32, "speaker": "PATIENT", "text": "Yeah, mornings before 10 work best for me, if there\u2019s an early opening next week."}
+{"t": 92.66, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 11860}
+{"t": 92.66, "speaker": "AGENT", "text": "You already have a new patient appointment booked for Thursday, August 20th at 945 a.m. Would you like to keep this appointment, reschedule it, or cancel it?"}
+{"t": 103.85, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1070}
+{"t": 103.85, "speaker": "PATIENT", "text": "Yeah, that works for me. Keep it as scheduled."}
+{"t": 108.76, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 4670}
+{"t": 108.76, "speaker": "AGENT", "text": "Your appointment is set for Thursday, August 20th at 9.45 a.m. Is there anything else I can help you with today?"}
+{"t": 116.91, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 740}
+{"t": 116.91, "speaker": "PATIENT", "text": "That\u2019s it, thanks so much. I\u2019ll be there."}
+{"t": 121.9, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 4780}
+{"t": 128.26, "speaker": "EVENT", "text": "bot chose to hang up: Appointment confirmed; ended call."}

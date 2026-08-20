@@ -1,0 +1,31 @@
+Call:        call-08-ambiguous_dates
+Scenario:    08 — Ambiguous and impossible dates
+Dialed:      +18054398008
+Audio:       call-08-ambiguous_dates.mp3
+Duration:    2:03
+
+Goal:
+  Ask for an appointment "next Tuesday" without clarifying which one. When they respond, ask what calendar date that is. Then ask to move it to "the 31st" of a month that only has 30 days. Finally ask for February 30th. Stay light and conversational, not quizzical — you are not testing them, you are just vague.
+
+What to watch for:
+  - Does "next Tuesday" resolve to the right calendar date?
+  - Does it accept February 30th?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics. Heart of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: I’m calling about wrist pain from climbing. I wanted to see if I could get an appointment next Tuesday.
+[0:21] AGENT: I see you're calling from a number we have on file. Am I speaking with Dana?
+[0:26] PATIENT: No, I’m not Dana. My name’s Devon Pryce.
+[0:32] AGENT: Please provide your date of birth as well.
+[0:35] PATIENT: I’m 26, and my date of birth is December 1, 1999.
+[0:43] AGENT: Just to confirm, I have your name as Devin Price and your date of birth as December 1st, 1999. Is that correct? If so, could you please spell your first and last name for me?
+[0:54] PATIENT: Yeah, that’s correct. It’s spelled D-E-V-O-N Pryce, P-R-Y-C-E.
+[1:02] AGENT: Would you like me to look up your record using the phone number you have on file with us? If so, please provide that number. If you're not sure I can confirm your name and date of birth again, let me know what you prefer.
+[1:15] PATIENT: Yeah, my number is 609-555-0134.
+[1:23] AGENT: I have your phone number as 609-555-0134 and your date of birth as December 1st, 1999. Is that correct?
+[1:35] PATIENT: Yes, that’s right.
+[1:44] AGENT: I'm unable to locate your record in our system. I can connect you to our patient support team for help with scheduling your appointment. Please stay on the line while I transfer you. Transferring you now. Thank you.
+[1:57] AGENT: Hello. You've reached the Pretty Good AI test line. Goodbye.
+[2:02] PATIENT: Okay, thanks.
+[2:02] -- bot chose to hang up: The call ended with the agent saying goodbye and the call was disconnected. --

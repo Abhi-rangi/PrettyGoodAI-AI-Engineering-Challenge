@@ -1,0 +1,17 @@
+{"t": 0.78, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?"}
+{"t": 14.36, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 710}
+{"t": 14.36, "speaker": "PATIENT", "text": "Hi, I\u2019m calling to ask about your opening hours and a few logistics. Do you have more than one location, and are X-rays done on-site?"}
+{"t": 25.01, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 9850}
+{"t": 25.01, "speaker": "AGENT", "text": "Pivot Point Orthopedics has one location, 1234 Recovery Way, Suite 200, Austin. We offer orthopedic care and physical therapy at this site. For x-rays, we do not perform them on site. If you need imaging, we'll help coordinate it with a nearby facility. Is there anything else you'd like to know about our clinic or services?"}
+{"t": 48.23, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1740}
+{"t": 48.23, "speaker": "PATIENT", "text": "Okay, thanks for that. Let me ask a quick question about timing and parking."}
+{"t": 52.75, "speaker": "PATIENT", "text": "Yeah, that\u2019s clear. Thanks. I wondered, what are your opening hours, and is parking pretty straightforward there? I\u2019ve got a bit of trouble getting around after walking far, so I want to know if it\u2019s easy to get in."}
+{"t": 69.6, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 16840}
+{"t": 69.6, "speaker": "AGENT", "text": "Our clinic is open Monday, Tuesday, and Thursday from 9 a.m. to 4 p.m., Wednesday from 12 p.m. to 7 p.m., and Friday from 9 a.m. to 12 p.m. Parking is free and right in front of the building. The entrance is close to the lot, and there's an elevator to reach Suite 200. It's designed to be easy for patients with mobility concerns. Let me know if you have any other questions or need help with an appointment."}
+{"t": 98.1, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1070}
+{"t": 98.1, "speaker": "PATIENT", "text": "That sounds great, thanks. I\u2019ve got the parking sorted and the elevator noted, which helps a lot. Just to double-check, what time are you open on Saturdays, if at all?"}
+{"t": 110.22, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 11200}
+{"t": 110.22, "speaker": "AGENT", "text": "We're closed on Saturdays. The clinic is open Monday through Friday only. If you need to schedule or have other questions, I'm here to help."}
+{"t": 120.23, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 940}
+{"t": 120.23, "speaker": "PATIENT", "text": "Okay, thanks a lot for the help. I\u2019m all set."}
+{"t": 120.57, "speaker": "EVENT", "text": "bot chose to hang up: Called to confirm hours and parking; ended the call after hearing they\u2019re closed Saturdays and that the clinic runs Monday through Friday."}

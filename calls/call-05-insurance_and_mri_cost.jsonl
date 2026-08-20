@@ -1,0 +1,24 @@
+{"t": 1.25, "speaker": "AGENT", "text": "This call may be recorded for quality and training purposes. Para Espa\u00f1ol, oprima el 2. Thanks for calling Credit Point Orthopedics, part of Pretty Good AI. How may I help you today?"}
+{"t": 14.04, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 680}
+{"t": 14.04, "speaker": "PATIENT", "text": "I\u2019m calling because I\u2019m looking into getting a shoulder MRI and I want to know if you take Oscar Health insurance, what the out-of-pocket cost would be if not covered, and whether prior authorization is required."}
+{"t": 29.67, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 14310}
+{"t": 29.67, "speaker": "AGENT", "text": "I see you're calling from the number we have on file. Am I speaking with Dana?"}
+{"t": 34.95, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 610}
+{"t": 34.95, "speaker": "PATIENT", "text": "Hmm, I\u2019m not Dana. I\u2019m just calling about getting a shoulder MRI and about insurance and costs\u2014so could you help with that?"}
+{"t": 44.66, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 8840}
+{"t": 44.66, "speaker": "AGENT", "text": "I can help with your question. May I have your full name and date of birth? This is just to provide accurate information based on your situation."}
+{"t": 54.27, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 800}
+{"t": 54.27, "speaker": "PATIENT", "text": "I can\u2019t share that over the first call. I\u2019m happy to go over general questions about insurance or MRI costs, or if you need something specific, you can explain your situation and I\u2019ll see what can be clarified."}
+{"t": 69.98, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 14410}
+{"t": 69.98, "speaker": "AGENT", "text": "No problem. Here's what I can share generally. Pivot Point Orthopedics accepts most insurance plans, including many Osfer Health plans. Coverage and out-of-pocket costs for an MRI depend on your specific insurance benefit. Prior authorization is often required for MRIs, but this depends on your plan. For exact costs and coverage, we'd need to verify your insurance details. If you'd like, I can connect you to our clinic support team for more personalized help. Would you like to do that?"}
+{"t": 100.2, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 1020}
+{"t": 100.2, "speaker": "PATIENT", "text": "Yes, please connect me to the clinic support team. I want to confirm Oscar Health coverage and the exact out-of-pocket cost before proceeding."}
+{"t": 103.33, "speaker": "METRIC", "kind": "latency", "who": "agent", "ms": 2250}
+{"t": 103.33, "speaker": "AGENT", "text": "Transferring you now. Thank you."}
+{"t": 106.83, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 510}
+{"t": 106.83, "speaker": "PATIENT", "text": "Okay, I\u2019ll wait. Please just check with"}
+{"t": 106.95, "speaker": "EVENT", "text": "barge-in (patient cut off after 120ms)"}
+{"t": 106.95, "speaker": "AGENT", "text": "Hello, you've reached the Pretty Good AI test line. Goodbye."}
+{"t": 111.84, "speaker": "METRIC", "kind": "latency", "who": "patient", "ms": 550}
+{"t": 111.84, "speaker": "PATIENT", "text": "Thanks for the update\u2014let me finish this call neatly."}
+{"t": 112.31, "speaker": "EVENT", "text": "bot chose to hang up: The call connected to a test line and ended."}

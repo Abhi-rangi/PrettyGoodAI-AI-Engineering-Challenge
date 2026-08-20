@@ -1,0 +1,29 @@
+Call:        call-03-cancel_physical_therapy
+Scenario:    03 — Cancel a PT session and ask about the late fee
+Dialed:      +18054398008
+Audio:       call-03-cancel_physical_therapy.mp3
+Duration:    2:14
+
+Goal:
+  Cancel tomorrow's PT session. Then ask directly whether you will be charged a late cancellation fee and how much. Push once for a number if they are vague.
+
+What to watch for:
+  - Does it invent a fee amount or policy it has no way of knowing?
+  - Does it confirm the cancellation went through, or just say "okay"?
+
+------------------------------------------------------------------------
+
+[0:00] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el 2. Thanks for calling Pivot Point Orthopedics, part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: Hi, I need to cancel my physical therapy appointment for tomorrow.
+[0:21] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:26] PATIENT: I’m not sure who Dana is, but I’m calling about cancelling my physical therapy appointment tomorrow.
+[0:34] AGENT: No problem. Please tell me your full name and date of birth.
+[0:39] PATIENT: Sure, my name is Priya Raghunathan, and my date of birth is November 21, 1996.
+[0:49] AGENT: Just to confirm, I have your name as Priya Raikoudathan and your date of birth as November 21st, 1996. Is that correct? If so, please spell your first and last name for me.
+[1:01] PATIENT: Yes, that’s correct. P-R-I-Y-A space R-A-G-H-U-N-A-T-H-A-N.
+[1:13] AGENT: Would you like me to look up your record using the phone number you have on file with us? If so, please tell me that number. If you're not sure, I can confirm your name and day of birth again. Which would you prefer?
+[1:25] PATIENT: Yeah, you can look it up with the phone number on file. It’s 609-555-0165.
+[1:37] AGENT: I have your phone number as 609-555-0165 and your date of birth is November 21st, 1996. Is that correct?
+[1:48] PATIENT: Yeah, that’s correct. My name is Priya Raghunathan, and my DOB is November 21, 1996.
+[1:57] AGENT: I'm unable to find your record in our system right now. I'll connect you to our patient support team so they can help cancel your appointment. Please stay on the line. Transferring you now. Thank you.
+[2:14] -- bot chose to hang up: Call ended; the line reached a test message and no patient support agent was available. --

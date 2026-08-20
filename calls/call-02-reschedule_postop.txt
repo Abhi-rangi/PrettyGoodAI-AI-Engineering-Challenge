@@ -1,0 +1,34 @@
+Call:        call-02-reschedule_postop
+Scenario:    02 — Reschedule a post-op follow-up, then change your mind
+Dialed:      +18054398008
+Audio:       call-02-reschedule_postop.mp3
+Duration:    2:03
+
+Goal:
+  Move your Thursday follow-up to Friday afternoon. Once Friday is sorted, change your mind and ask for Monday morning instead. Confirm the final time.
+
+What to watch for:
+  - After the change of mind, does it confirm Monday or still think Friday?
+  - Does it verify the original appointment exists before moving it?
+
+------------------------------------------------------------------------
+
+[0:01] AGENT: This call may be recorded for quality and training purposes. Para Español, oprima el dos. Thanks for calling Pivot Point Orthopedics. Part of Pretty Good AI. How may I help you today?
+[0:14] PATIENT: Hey, I’m calling to see if my follow-up appointment, which is currently on Thursday, can be moved to Friday afternoon.
+[0:23] AGENT: I see you're calling from the number we have on file. Am I speaking with Dana?
+[0:28] PATIENT: I’m not sure—I’m just a caller. But I did want to check on that Thursday to Friday change.
+[0:35] AGENT: To look up the appointment, I'll need your full name and date of birth. Could you please provide both?
+[0:42] PATIENT: Marcus Bell is my full name, and my date of birth is August 3, 1979.
+[0:51] AGENT: Just to confirm, I have your name as Marcus Bell and your date of birth as August 3, 1979. Is that correct?
+[1:00] PATIENT: Let me double-check that with you and then we’ll see about the timing.
+[1:02] PATIENT: Yes, that’s right. Marcus Bell, and August 3, 1979.
+
+Now, about moving that follow-up—I'm hoping for Friday afternoon, but if that’s not possible, Monday morning would be good too.
+[1:18] AGENT: I have your name as Marcus Bell, date of birth, August 3, 1979, and your phone number is 856-880-6585. Is all of that correct?
+[1:33] PATIENT: Yeah, that’s correct. Thank you.
+[1:40] AGENT: I'm unable to find your record in our system, so I can't make changes to your appointment right now. I can connect you to our patient support team for help. Would you like me to do that?
+[1:51] PATIENT: Yeah, that makes sense—if you need to connect me to support, please go ahead.
+[1:55] AGENT: Kids for you now. Thank you
+[1:58] AGENT: Hello, you've reached the pretty good AI test line. Goodbye.
+[1:58] PATIENT: Okay, thank
+[2:03] -- bot chose to hang up: Call completed after being connected to support; no further information was exchanged. --
