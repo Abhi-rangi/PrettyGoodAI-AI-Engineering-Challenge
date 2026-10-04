@@ -1,60 +1,42 @@
 #!/usr/bin/env python3
-"""Verify everything works before spending money on a phone call.
+"""Check the setup before calling the clinic number.
 
     python preflight.py
 
-Checks, in order: the scenario files parse, the OpenAI key is valid and the Realtime
-session config is accepted, the Twilio credentials work and the from-number is real,
-and the public tunnel is reachable. Every one of these has a failure mode that would
-otherwise show up as a silent dead call, which is an expensive way to find a typo.
+Checks, in order: the OpenAI key works and the Realtime session config (prompt and
+tools included) is accepted, the Twilio credentials work and a number on the account
+points its voice webhook at this server, and the public tunnel reaches /health.
 """
 import asyncio
 import json
 import sys
+import urllib.request
 
-import websockets
-
-from patient import config, persona
-from patient.bridge import REALTIME_URL, build_session_config
+from receptionist import prompt, realtime
+from receptionist.config import Settings
 
 PASS, FAIL, WARN = "  \033[32mok\033[0m  ", "  \033[31mFAIL\033[0m", "  \033[33mwarn\033[0m"
 
 
-def check_scenarios() -> bool:
-    try:
-        scenarios = persona.load_all()
-        for s in scenarios:
-            s.system_prompt()
-        print(f"{PASS} {len(scenarios)} scenarios parse and build prompts")
-        return True
-    except Exception as exc:
-        print(f"{FAIL} scenario problem: {exc}")
-        return False
-
-
-async def check_openai() -> bool:
+async def check_openai(settings: Settings) -> bool:
     """Open a real Realtime session and push our exact session.update through it."""
-    if not config.OPENAI_API_KEY:
+    if not settings.openai_api_key:
         print(f"{FAIL} OPENAI_API_KEY is not set")
         return False
-
-    payload = build_session_config(persona.load_all()[0])
+    instructions = prompt.render(settings.clinic_name, settings.clinic_timezone, "6095550100")
     try:
-        async with websockets.connect(
-            REALTIME_URL, additional_headers={"Authorization": f"Bearer {config.OPENAI_API_KEY}"}
-        ) as ws:
-            await ws.send(json.dumps(payload))
+        async with realtime.connect(settings) as ws:
+            await ws.send(json.dumps(realtime.session_update(settings, instructions)))
             for _ in range(12):
                 event = json.loads(await asyncio.wait_for(ws.recv(), timeout=10))
                 if event["type"] == "session.updated":
-                    audio = event["session"].get("audio", {})
-                    fmt = audio.get("input", {}).get("format")
-                    print(f"{PASS} OpenAI Realtime accepted the session "
-                          f"(model={config.REALTIME_MODEL}, input format={fmt})")
+                    tools = len(event["session"].get("tools", []))
+                    print(f"{PASS} Realtime accepted the session "
+                          f"(model={settings.realtime_model}, {tools} tools)")
                     return True
                 if event["type"] == "error":
-                    print(f"{FAIL} OpenAI rejected the session config:")
-                    print(f"       {event['error'].get('message')}")
+                    print(f"{FAIL} Realtime rejected the session config: "
+                          f"{event['error'].get('message')}")
                     return False
             print(f"{WARN} no session.updated came back; check manually")
             return False
@@ -63,71 +45,66 @@ async def check_openai() -> bool:
         return False
 
 
-def check_twilio() -> bool:
-    if not (config.TWILIO_ACCOUNT_SID and config.TWILIO_AUTH_TOKEN):
+def check_twilio(settings: Settings) -> bool:
+    if not (settings.twilio_account_sid and settings.twilio_auth_token):
         print(f"{FAIL} Twilio credentials are not set")
         return False
     try:
         from twilio.rest import Client
-        client = Client(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN)
-        account = client.api.accounts(config.TWILIO_ACCOUNT_SID).fetch()
-
-        numbers = [n.phone_number for n in client.incoming_phone_numbers.list()]
-        if not numbers:
-            print(f"{FAIL} This account owns no phone numbers yet.")
-            print( "       Console -> Phone Numbers -> Manage -> Buy a number, tick Voice.")
-            print( "       The number shown in Twilio's onboarding 'Try out Voice' panel is a")
-            print( "       shared demo number, not yours — it will not work as a caller ID.")
-            return False
-        if config.TWILIO_FROM_NUMBER not in numbers:
-            print(f"{FAIL} TWILIO_FROM_NUMBER {config.TWILIO_FROM_NUMBER} is not on this account.")
-            print(f"       Numbers you own: {', '.join(numbers)}")
-            return False
-
-        print(f"{PASS} Twilio account '{account.friendly_name}' [{account.type}], "
-              f"calling from {config.TWILIO_FROM_NUMBER}")
-        if account.type == "Trial":
-            verified = [c.phone_number for c in client.outgoing_caller_ids.list()]
-            print(f"{WARN} Trial account — outbound calls only reach verified numbers.")
-            print(f"       Verified: {verified or 'none yet'}")
-            print(f"       {config.TARGET_NUMBER} cannot be verified (it is not your line),")
-            print(f"       so submission calls need a paid upgrade. Self-tests are fine:")
-            print(f"       python run_call.py --scenario 01 --to <your mobile>")
-        return True
+        client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+        numbers = client.incoming_phone_numbers.list()
     except Exception as exc:
         print(f"{FAIL} Twilio check failed: {exc}")
         return False
+    if not numbers:
+        print(f"{FAIL} this Twilio account owns no phone numbers")
+        return False
+    want = f"https://{settings.public_host}/voice"
+    if settings.twilio_number:
+        numbers = [n for n in numbers if n.phone_number == settings.twilio_number]
+        if not numbers:
+            print(f"{FAIL} TWILIO_NUMBER {settings.twilio_number} is not on this account")
+            return False
+    wired = [n.phone_number for n in numbers if (n.voice_url or "").rstrip("/") == want]
+    if wired:
+        print(f"{PASS} {', '.join(wired)} sends incoming calls to {want}")
+        return True
+    print(f"{FAIL} voice webhook should be {want}")
+    for n in numbers:
+        print(f"       {n.phone_number} -> {n.voice_url or '(none)'}")
+    print("       Console -> Phone Numbers -> your number -> 'A call comes in' -> Webhook, POST")
+    return False
 
 
-def check_tunnel() -> bool:
-    if not config.PUBLIC_HOST:
+def check_tunnel(settings: Settings) -> bool:
+    if not settings.public_host:
         print(f"{FAIL} PUBLIC_HOST is not set")
         return False
     try:
-        import urllib.request
-        with urllib.request.urlopen(f"https://{config.PUBLIC_HOST}/health", timeout=8) as resp:
-            body = json.loads(resp.read())
-        print(f"{PASS} tunnel reachable at {config.PUBLIC_HOST} (server model={body.get('model')})")
+        with urllib.request.urlopen(f"https://{settings.public_host}/health", timeout=8) as r:
+            body = json.loads(r.read())
+        print(f"{PASS} server reachable at {settings.public_host} (model={body.get('model')})")
         return True
     except Exception as exc:
-        print(f"{FAIL} could not reach https://{config.PUBLIC_HOST}/health — "
-              f"is uvicorn running and ngrok pointed at it? ({exc})")
+        print(f"{FAIL} could not reach https://{settings.public_host}/health "
+              f"- is uvicorn running and the tunnel pointed at it? ({exc})")
         return False
 
 
 async def main() -> None:
+    settings = Settings.from_env()
     print("\nPreflight\n")
-    results = [
-        check_scenarios(),
-        await check_openai(),
-        check_twilio(),
-        check_tunnel(),
-    ]
+    results = [await check_openai(settings), check_twilio(settings), check_tunnel(settings)]
+    if not settings.validate_twilio_signature:
+        print(f"{WARN} VALIDATE_TWILIO_SIGNATURE is off: anyone can POST /voice")
+    if settings.store_calls:
+        print(f"{WARN} STORE_CALLS is on: call audio and transcripts (PHI) are written "
+              f"to {settings.call_dir}")
     print()
     if all(results):
-        print("All good. `python run_call.py --scenario 01` to place the first call.\n")
+        print("All good. Call the clinic number to test.\n")
     else:
-        print("Fix the failures above before calling.\n")
+        print("Fix the failures above first.\n")
         sys.exit(1)
 
 
