@@ -1,139 +1,69 @@
-# Automated patient caller — Pretty Good AI assessment
+# Clinic phone receptionist
 
-A Python voice bot that phones the Pretty Good AI test line, plays a patient with a goal,
-holds a natural two-way conversation, and records both sides to MP3 with a timestamped
-transcript.
+An inbound voice receptionist for a physical therapy clinic. It answers the clinic's
+Twilio number, identifies the caller (existing patient lookup, or a minimal new-patient
+record), and books, reschedules or cancels appointments against the clinic system.
+Anything else (insurance, billing, clinical questions) becomes a front-desk callback.
 
-**15 calls placed** from a single number (+1-856-880-6585), all 1:34–2:50, median reply
-latency 660ms on our side. Findings are in **[`BUGS.md`](BUGS.md)** (12, most severe
-first); design reasoning is in **[`ARCHITECTURE.md`](ARCHITECTURE.md)**; recordings and
-transcripts are indexed in **[`calls/`](calls/README.md)**.
+Speech-to-speech over the OpenAI Realtime API, bridged to Twilio Media Streams. Both
+legs are G.711 mu-law 8kHz, so audio is never transcoded. See
+[ARCHITECTURE.md](ARCHITECTURE.md).
 
----
-
-## Setup
-
-Python 3.10+, [ffmpeg](https://ffmpeg.org) (`brew install ffmpeg`), and
-[ngrok](https://ngrok.com/download).
+## Run it
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env       # then fill in the four credentials
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+cp .env.example .env          # fill in keys and PUBLIC_HOST
+.venv/bin/uvicorn server:build --factory --port 5050
+ngrok http 5050               # PUBLIC_HOST is the ngrok host
 ```
 
-> **Twilio must be a paid account.** A trial account can only dial numbers you have
-> verified with a code, and the assessment line cannot be verified. `preflight.py` checks
-> for this and says so before you waste a call.
-
-## Running
-
-Two terminals stay up for the session; the third places calls.
+In the Twilio console, set the clinic number's **A call comes in** to Webhook,
+`https://<PUBLIC_HOST>/voice`, HTTP POST. Then:
 
 ```bash
-# 1 — media-stream server
-uvicorn server:app --port 5050 --reload
-
-# 2 — public tunnel; copy the forwarding host into PUBLIC_HOST in .env
-ngrok http 5050
-
-# 3
-python preflight.py                 # validates creds, session schema and tunnel
-python run_call.py --scenario 01    # one call
+.venv/bin/python preflight.py   # checks OpenAI session, Twilio webhook, tunnel
+.venv/bin/python -m pytest      # no network needed
 ```
 
-| Command | What it does |
-|---|---|
-| `python run_call.py --list` | Show the scenario catalogue |
-| `python run_call.py --scenario 07` | One call (id, name or slug all work) |
-| `python run_call.py --all [--skip 01,04]` | Every scenario, 20s apart |
-| `python run_call.py --scenario 01 --to +1555...` | Rehearse against your own phone |
-| `python preflight.py` | Credentials, Realtime session schema, tunnel |
-| `python analyze.py stats` | Durations, turns, measured latency, quality flags |
-| `python analyze.py audio` | Cross-talk, levels, clipping from the recordings |
-| `python analyze.py report` | Write `bug-candidates.md` for manual review |
-| `python analyze.py repair` | Rebuild a transcript from audio if a side went missing |
-
-Each call writes three files into `calls/`:
-
-```
-call-07-weekend_trap.mp3      stereo: left = their agent, right = our patient
-call-07-weekend_trap.txt      timestamped transcript, goal and watch-list in the header
-call-07-weekend_trap.jsonl    same turns, machine-readable, plus latency metrics
-```
-
-Transcript timestamps line up with the MP3, so `BUGS.md` can cite `1:23` and you can seek
-straight to it.
-
-### Checking the calls
-
-`analyze.py stats` is the pre-submission gate — it flags any call under a minute, thin on
-turns, missing audio, or missing one side of the transcript.
-
-It also reports **measured reply latency for both sides**, from the Realtime API's
-voice-activity events clocked against the Twilio `mark` that confirms our audio finished
-playing. `analyze.py audio` derives cross-talk, peak level and clipping straight from the
-recordings. Between them, "does this sound natural" is a number rather than an impression —
-which is how the 8.2s figure in the bug report was verified two independent ways.
-
-`analyze.py report` scans transcripts for suspicious moments and writes
-`bug-candidates.md`. Its patterns were written *after* hearing how this agent actually
-talks — the first version, written before any call, matched nothing across twelve calls.
-Output is candidates, not findings; each one gets listened to before it earns a place in
-`BUGS.md`.
-
----
-
-## Scenarios
-
-The test line is **Pivot Point Orthopedics**, a specialist practice, so the scenarios are
-written for orthopedic callers — a knee, a cast, a post-op follow-up. Two deliberately test
-the opposite: what happens when the agent is asked for something outside its specialty.
-
-| # | Scenario | What it probes |
-|---|---|---|
-| 01 | New patient, knee pain | Happy path; does intake collect what it needs |
-| 02 | Reschedule post-op, then change your mind | Does the second change overwrite the first |
-| 03 | Cancel PT + late fee | Does it invent a policy it cannot know |
-| 04 | Refill: meloxicam, then oxycodone | Is a Schedule II opioid handled differently |
-| 05 | Insurance, MRI cost, prior auth | Does it claim to accept a plan it cannot verify |
-| 06 | Hours, second location, on-site X-ray | Internal consistency when re-asked |
-| 07 | Sunday appointment | The closed-hours trap from their own example |
-| 08 | Ambiguous + impossible dates | "next Tuesday", the 31st of a 30-day month, Feb 30 |
-| 09 | Mid-sentence corrections | Barge-in; does the last correction win |
-| 10 | Annual physical at an ortho practice | Scope validation |
-| 11 | Numb, cold toes below a fresh cast | Escalation on a limb-threatening emergency |
-| 12 | Rambling post-op caller | Holding the thread against tangents |
-
-Adding one is a YAML file in `scenarios/` — persona, goal, success criteria, watch-list.
-No code changes.
-
-Scenarios 04 and 11 were each run twice. The first attempt at 11 never reached the symptom
-because the agent's identity checks consumed the call, so it was re-run with the symptom
-moved to the opening sentence; see the methodology notes in `BUGS.md`.
+Call the number.
 
 ## Layout
 
-```
-run_call.py          CLI: builds TwiML and places the call
-server.py            FastAPI app exposing the media-stream websocket
-preflight.py         Validates credentials and the Realtime session schema
-analyze.py           Call stats, audio measurement, transcript repair, bug candidates
-patient/
-  bridge.py          The relay: audio pumps, barge-in, end_call tool, watchdog
-  persona.py         Scenario YAML -> system prompt; VAD tuning
-  recorder.py        Stereo mu-law capture -> WAV -> MP3
-  transcript.py      Timestamped two-sided transcript + latency metrics
-  audio.py           G.711 mu-law decode (audioop was removed in Python 3.13)
-  config.py          Settings; the assessment number is a constant, not an env var
-scenarios/           12 YAML scenario definitions
-calls/               15 recordings, transcripts, and an index
-```
+| File | What it owns |
+|---|---|
+| `server.py` | `/voice` webhook (signature check, TwiML), `/media-stream` (token check) |
+| `receptionist/bridge.py` | Per-call relay between Twilio and OpenAI, tool loop, watchdog |
+| `receptionist/turns.py` | Playback and turn state: barge-in decisions, reply latency. Pure, tested |
+| `receptionist/tools.py` | Tool schemas and handlers; all input validation |
+| `receptionist/backend.py` | `ClinicBackend` interface and the in-memory demo backend |
+| `receptionist/prompt.py` | The receptionist script, rendered per call with today's date and caller ID |
+| `receptionist/realtime.py` | Realtime connection and session config |
+| `receptionist/recorder.py`, `transcript.py` | Opt-in call audio and transcripts |
 
-## Cost
+## Connecting the clinic app
 
-About $8 all in, against the $20 budget: roughly $6 of OpenAI Realtime audio tokens on
-`gpt-realtime-2.1-mini` and under $1 of Twilio (~$0.014/min voice plus $0.0044/min media
-streams, on a $1.15/mo number). Call recording is done in-process rather than through
-Twilio's paid recording — free, and it gives the per-speaker channel separation the
-transcripts and audio analysis depend on.
+The server currently runs on `InMemoryBackend`, so **bookings are not saved anywhere**.
+To go live, implement `ClinicBackend` (in `receptionist/backend.py`) against the clinic
+app's API and pass it to `create_app` in `server.py:build`. The contract:
+
+- Compare phone numbers on digits only; the clinic app stores them as typed.
+- `book` and `reschedule` must re-check the slot and raise `SlotUnavailable` if it
+  has gone. Double-booking protection belongs in the clinic app, not the bot.
+- Methods taking a `patient_id` act only on that patient's data.
+- `create_patient` receives a `date`; the clinic API expects an ISO datetime.
+
+## Before real patients call
+
+- **PHI.** Call audio and transcripts are patient data. They are off by default
+  (`STORE_CALLS`, `LOG_TRANSCRIPTS`) and write to the git-ignored `var/` when enabled.
+  OpenAI and Twilio both process call audio: get BAAs in place first.
+- **Hosting.** ngrok is for development. Run behind a stable HTTPS host.
+- **Recording notice.** If you enable `STORE_CALLS`, add a recording disclosure to the
+  opening line; several US states require all-party consent.
+
+## History
+
+This repo began as an automated *patient caller* used to test another clinic's voice
+agent. That code was replaced by the receptionist; its recordings and findings remain
+in `calls/` and `BUGS.md`, and the code is in git history (`632a640`).

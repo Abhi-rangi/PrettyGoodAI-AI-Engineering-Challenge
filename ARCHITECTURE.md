@@ -1,124 +1,85 @@
 # Architecture
 
-## How it works
-
-`run_call.py` places an outbound call through Twilio's REST API with the TwiML passed
-inline, so this repo never needs a public HTTP endpoint — only a websocket. The TwiML is
-a single `<Connect><Stream>` pointing at `wss://<tunnel>/media-stream/<scenario>/<label>/<number>`.
-When the Pretty Good AI agent answers, Twilio opens that socket and begins pushing 20ms
-frames of G.711 mu-law at 8kHz. `server.py` compiles the named scenario's YAML into a
-system prompt and hands it to `CallBridge`, which opens a second websocket to the OpenAI
-Realtime API and configures the session for `audio/pcmu` in both directions. Three
-asyncio tasks then run for the life of the call: one pump carrying Twilio frames up as
-`input_audio_buffer.append`, one carrying `response.output_audio.delta` frames back down
-inside a Twilio `media` envelope, and a watchdog that guarantees the call ends — on the
-bot's own `end_call` tool, on dead air, or on a hard duration cap. Because both legs are
-already mu-law 8kHz, **no audio is decoded, resampled or re-encoded anywhere in the hot
-path**; the base64 payload is lifted out of one envelope and dropped into the other. The
-same frames are tee'd into a stereo recorder (their agent left, our patient right) while
-the Realtime API's transcription events build a transcript whose timestamps line up with
-the resulting MP3.
-
-## Why this way
-
-The decision that mattered was speech-to-speech versus a cascading STT → LLM → TTS
-pipeline, and the brief settled it: voice quality is graded before code, and awkward
-pauses are named as a failure. A cascade adds a transcribe-then-think-then-synthesise
-round trip landing around 800ms–1.5s, and it *sounds* like a bot waiting its turn. The
-Realtime API holds ~660ms median across these 15 calls and keeps the prosody that makes a
-caller read as human. Audio tokens cost far more than Whisper plus a small text model, but
-over ~35 minutes of calls that difference is a few dollars against a $20 budget — the
-wrong variable to optimise. I chose a raw websocket over Pipecat (the alternative, and my
-fallback if the bridge had not worked by hour three) because the interesting failure here
-is barge-in and I wanted to own it. It needs three things done together: a
-`conversation.item.truncate` so the model does not believe it said words nobody heard, a
-Twilio `clear` to flush the playout buffer, and a matching trim on the local recording.
-Getting any one wrong is audible — and the Twilio `clear` has to be unconditional, because
-generation finishes seconds before playback does, so the most common interruption arrives
-when there is nothing left to truncate but plenty still queued in the far end's speaker.
-
-## Data flow
+## Call flow
 
 ```mermaid
-flowchart LR
-    CLI["run_call.py<br/><small>places the call</small>"]
-    TWILIO["Twilio<br/><small>Voice + Media Streams</small>"]
-    AGENT(["Pretty Good AI agent<br/>+1-805-439-8008"])
-    BRIDGE["CallBridge<br/><small>server.py</small>"]
-    OPENAI["OpenAI Realtime<br/><small>gpt-realtime-2.1-mini</small>"]
-    FILES[("calls/call-NN-scenario<br/>.mp3 · .txt · .jsonl")]
+sequenceDiagram
+    participant C as Caller
+    participant T as Twilio
+    participant S as server.py
+    participant B as CallBridge
+    participant O as OpenAI Realtime
+    participant K as ClinicBackend
 
-    CLI -->|"REST, inline TwiML"| TWILIO
-    TWILIO <-->|"PSTN"| AGENT
-    TWILIO <-->|"wss · μ-law 8k · 20 ms frames"| BRIDGE
-    BRIDGE <-->|"wss · audio/pcmu"| OPENAI
-    BRIDGE -->|"both directions tee'd"| FILES
-
-    classDef ext fill:#e8eef7,stroke:#5b7ba6,stroke-width:1px,color:#1c3557
-    classDef mine fill:#eaf4ec,stroke:#5a9367,stroke-width:1px,color:#1e4426
-    classDef store fill:#f6f1e7,stroke:#a89066,stroke-width:1px,color:#4a3a1c
-    class TWILIO,AGENT,OPENAI ext
-    class CLI,BRIDGE mine
-    class FILES store
+    C->>T: dials clinic number
+    T->>S: POST /voice (signed)
+    S-->>T: TwiML <Connect><Stream> + one-time token, caller ID
+    T->>S: WS /media-stream, start frame
+    S->>B: token valid
+    B->>O: session.update (prompt, tools), response.create (greeting)
+    loop conversation
+        T->>B: caller audio
+        B->>O: input_audio_buffer.append
+        O->>B: audio deltas
+        B->>T: media, then a mark per response
+        O->>B: function call
+        B->>K: validated tool call
+        B->>O: function_call_output, response.create
+    end
+    O->>B: end_call
+    B->>T: goodbye mark, then REST hangup
 ```
 
-Green is mine, blue is external, and the single arrow into storage is the point: both
-audio directions pass through one process, so recording and transcription are a tee off
-the live stream rather than a separate retrieval step. Both websocket legs carry G.711
-mu-law at 8kHz, so **audio is never decoded, resampled or re-encoded** — the base64
-payload moves from one envelope to the other untouched.
+## Design decisions
 
-Inside `CallBridge`, three asyncio tasks run for the life of the call:
+**The bot speaks first.** Server VAD only creates responses after the caller talks, so
+the bridge sends an explicit `response.create` with the greeting as soon as the session
+is configured.
 
-| Task | Responsibility |
-|---|---|
-| Twilio → OpenAI | `input_audio_buffer.append` per 20ms frame |
-| OpenAI → Twilio | `response.output_audio.delta` wrapped in a `media` envelope |
-| Watchdog | Ends the call on `end_call`, on dead air, or at the duration cap |
+**Playback, not generation, decides who is speaking.** The model generates audio
+faster than real time. `turns.py` treats the receptionist as audible until Twilio echoes
+the mark sent after each response. That one rule drives barge-in (flush Twilio, truncate
+the model's item, trim the recording, including during the buffered tail), and it is
+where the caller's reply latency is clocked from.
 
-Barge-in spans both pumps: a Twilio `clear` to flush playout, a
-`conversation.item.truncate` so the model does not believe it said unheard words, and a
-matching trim on the recording.
+**Validation in tools, recovery in the prompt.** A voice model cannot count digits it
+heard or check that a date exists. Handlers validate and return short error codes
+(`invalid_phone`, `slot_taken`, `system_unavailable`); the prompt says how to recover
+from each. Slots carry a ready-made spoken label so the model never computes a weekday.
 
-## Tradeoffs I accepted
+**The verified patient lives in the call context.** `lookup_patient` and
+`save_new_patient` set `CallContext.patient_id`; booking, listing, rescheduling and
+cancelling act on that patient only, and no tool takes a patient id from the model.
+Lookups are capped at three per call, return no record details, and never say which
+field failed to match. A new-patient save that matches an existing name and date of
+birth is refused rather than attached.
 
-**Local + ngrok rather than a deployed server.** Iteration speed mattered more than a
-stable URL for a one-day build, and I could watch frame-level logs while a call was live.
-The cost is a tunnel host that rotates on restart and has to be re-copied into `.env`.
+**Tool calls do not block the audio pump.** Each runs as its own task with a timeout.
+Outputs are sent when ready; once the response that requested them is done, the bridge
+asks the model to continue. If the caller cut that response off, server VAD has already
+started a new one, so no second `response.create` is sent.
 
-**Prompt-level steering rather than a scripted state machine.** Each scenario is a
-persona, a goal, success criteria and a watch-list in YAML. A state machine over turns
-would have fought the model's own sense of pacing and produced exactly the "scripted
-benchmark runner" the brief warns against. The cost showed up immediately: when I tightened
-the prompt to stop the bot padding its turns, it started dropping the *second* half of a
-two-part goal — it asked for the meloxicam and never mentioned the oxycodone, which was
-the entire point of that scenario. Naturalness and goal completion pull against each
-other, and the fix was to make goal completion explicit rather than trade one for the other.
+**Authentication before cost.** `/voice` checks Twilio's signature against the public
+URL. The TwiML carries a one-time token as a stream parameter, and `/media-stream` checks
+it on Twilio's `start` frame before opening the OpenAI connection.
 
-**Retry the control plane, not the media plane.** A dropped media websocket is a discarded
-call; reconnecting mid-conversation and resyncing state costs more than re-running the
-scenario. The REST calls that place and poll a call are different, and I learned that the
-hard way — a single TCP reset while polling Twilio ended a twelve-call run at call four,
-even though that call had already connected and been recorded. Status polls now tolerate
-five consecutive failures with backoff, and a failed scenario is logged and skipped rather
-than taking the queue down with it.
+**PHI off by default.** Recording and transcript logging are opt-in, write outside
+version control, and the console log carries tool names and outcomes, never arguments.
 
-**Whisper for transcription, with a backstop.** The transcript is an artifact for humans,
-not something the bot reasons over — it hears the raw audio directly. What mattered was
-*completeness*: transcription lands well after the audio it describes, so closing the
-session at hangup silently dropped the last few turns. One call had thirty seconds of agent
-speech in the recording and no matching lines in the transcript. Teardown now commits any
-uncommitted input audio and drains in-flight transcription events, and `analyze.py repair`
-can rebuild either side from the recording if that ever fails.
+## Tradeoffs
 
-**Measuring rather than eyeballing.** Reply latency is the headline finding, so it had to
-be right, and I got it wrong twice. First by diffing consecutive transcript timestamps —
-wrong, because the interval between two turns is mostly the length of the turn itself.
-Then by clocking from `response.done` — also wrong, because that fires when generation
-ends while Twilio is still playing several seconds of buffered audio, so I was counting my
-own playout tail as their delay. It reported an 18-second silence on a call whose audio
-contained no gap over 2.4 seconds, and that contradiction is what exposed it. The figure
-now clocks from the Twilio `mark` that confirms playback finished, and I validated it
-against the recordings by an entirely independent route — splitting the stereo channels by
-frame energy and measuring the gaps acoustically. Those agreed, and only then did the
-number go in the bug report.
+- **Speech-to-speech over an STT, LLM, TTS cascade:** lower latency and more natural
+  prosody; costs more per minute and gives less control over exact wording.
+- **One process per server, state in memory:** the stream-token store and in-memory
+  backend do not survive restarts or scale across instances. Fine for one clinic line;
+  move tokens to a shared store before running more than one instance.
+- **A dropped media socket ends the call.** Reconnecting mid-conversation is not
+  attempted.
+
+## Known gaps
+
+- The production `ClinicBackend` adapter does not exist yet.
+- Spelled names are matched exactly after normalisation; letters that sound alike over
+  a phone line (M/N, B/D) will miss. Fuzzy last-name matching belongs in the adapter.
+- No automated end-to-end voice test. The old patient-caller bot (git history) could be
+  adapted to dial the receptionist with scripted personas.

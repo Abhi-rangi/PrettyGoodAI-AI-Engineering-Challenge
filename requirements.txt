@@ -1,8 +1,6 @@
 fastapi>=0.115.0
+python-multipart>=0.0.9
 uvicorn[standard]>=0.32.0
 websockets>=13.0
 twilio>=9.3.0
 python-dotenv>=1.0.1
-PyYAML>=6.0.2
-openai>=1.50.0
-numpy>=1.26

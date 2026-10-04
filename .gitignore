@@ -3,10 +3,11 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.pytest_cache/
 .DS_Store
-_to_delete/
-bug-candidates.md
 
-# Recordings and transcripts ARE the deliverable and are committed on purpose.
-# Only the intermediate WAV is ignored; the MP3 next to it is the artifact.
+# Receptionist call recordings and transcripts are PHI. Never commit them.
+var/
+
+# Legacy assessment recordings (calls/) predate the receptionist and are kept as history.
 calls/**/*.wav
